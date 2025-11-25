@@ -6,7 +6,7 @@ import PasswordResetEmail from '@/emails/password-reset-email'
 import crypto from 'crypto'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev'
 
 export async function POST(req: Request) {
   try {
