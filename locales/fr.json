@@ -150,7 +150,20 @@
     "invalidInvitationCode": "Code d'invitation invalide",
     "invitationCodeDeactivated": "Ce code d'invitation a été désactivé",
     "invitationCodeAlreadyUsed": "Ce code d'invitation a déjà été utilisé",
-    "invitationCodeExpired": "Ce code d'invitation a expiré"
+    "invitationCodeExpired": "Ce code d'invitation a expiré",
+    "forgotPasswordDescription": "Entrez votre adresse email pour recevoir un lien de réinitialisation",
+    "sendResetLink": "Envoyer le lien",
+    "sending": "Envoi...",
+    "resetLinkSent": "Un email contenant le lien de réinitialisation a été envoyé à votre adresse",
+    "backToLogin": "Retour à la connexion",
+    "resetPasswordDescription": "Entrez votre nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "passwordMinLength": "Au moins 6 caractères",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+    "resetting": "Réinitialisation...",
+    "resetPasswordButton": "Réinitialiser",
+    "passwordResetSuccess": "Mot de passe réinitialisé avec succès !",
+    "redirectingToLogin": "Redirection vers la page de connexion..."
   },
   "waitlist": {
     "title": "Liste d'attente",

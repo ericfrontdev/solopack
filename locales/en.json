@@ -145,7 +145,20 @@
     "invalidInvitationCode": "Invalid invitation code",
     "invitationCodeDeactivated": "This invitation code has been deactivated",
     "invitationCodeAlreadyUsed": "This invitation code has already been used",
-    "invitationCodeExpired": "This invitation code has expired"
+    "invitationCodeExpired": "This invitation code has expired",
+    "forgotPasswordDescription": "Enter your email address to receive a reset link",
+    "sendResetLink": "Send reset link",
+    "sending": "Sending...",
+    "resetLinkSent": "An email containing the reset link has been sent to your address",
+    "backToLogin": "Back to login",
+    "resetPasswordDescription": "Enter your new password",
+    "newPassword": "New password",
+    "passwordMinLength": "At least 6 characters",
+    "passwordsDontMatch": "Passwords don't match",
+    "resetting": "Resetting...",
+    "resetPasswordButton": "Reset password",
+    "passwordResetSuccess": "Password reset successfully!",
+    "redirectingToLogin": "Redirecting to login page..."
   },
   "waitlist": {
     "title": "Join the Waitlist",

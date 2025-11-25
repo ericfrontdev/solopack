@@ -46,6 +46,11 @@ export default function LoginPage() {
     await signIn('google', { callbackUrl: '/' })
   }
 
+  const handleDemoClick = () => {
+    setEmail('demo@solopack.app')
+    setPassword('demo123')
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-sky-50 dark:from-slate-950 dark:to-slate-900 p-4">
       <div className="w-full max-w-md">
@@ -86,12 +91,20 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium mb-2"
-              >
-                {t('auth.password')}
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium"
+                >
+                  {t('auth.password')}
+                </label>
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  {t('auth.forgotPassword')}
+                </Link>
+              </div>
               <input
                 id="password"
                 type="password"
@@ -152,6 +165,16 @@ export default function LoginPage() {
             </svg>
             Google
           </Button>
+
+          {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && (
+            <button
+              type="button"
+              onClick={handleDemoClick}
+              className="mt-4 text-[#ad3b33] font-semibold hover:text-[#8e3c36]"
+            >
+              Essayer la démo
+            </button>
+          )}
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             {t('auth.noAccount')}{' '}
