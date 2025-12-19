@@ -196,11 +196,14 @@ export const InvoicePDFTemplate = React.forwardRef<
             {t('invoice.issueDate')}
           </p>
           <p className="text-sm md:text-base text-gray-900">
-            {new Date(invoice.createdAt).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
+            {new Date(invoice.createdAt).toLocaleDateString(
+              locale === 'fr' ? 'fr-FR' : 'en-US',
+              {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }
+            )}
           </p>
         </div>
         <div className="mt-6">
@@ -243,7 +246,9 @@ export const InvoicePDFTemplate = React.forwardRef<
                   {item.description}
                 </td>
                 <td className="py-3 md:py-4 text-gray-700 whitespace-nowrap">
-                  {new Date(item.date).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
+                  {new Date(item.date).toLocaleDateString(
+                    locale === 'fr' ? 'fr-FR' : 'en-US'
+                  )}
                 </td>
                 <td className="py-3 md:py-4 text-right text-gray-900 font-medium whitespace-nowrap">
                   {item.amount.toFixed(2)} $
@@ -276,7 +281,9 @@ export const InvoicePDFTemplate = React.forwardRef<
                 </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600">{t('invoice.qst')} (9,975%)</span>
+                <span className="text-gray-600">
+                  {t('invoice.qst')} (9,975%)
+                </span>
                 <span className="text-gray-900">
                   {invoice.tvq.toFixed(2)} $
                 </span>
@@ -301,13 +308,17 @@ export const InvoicePDFTemplate = React.forwardRef<
 
       {/* Notes */}
       <div className={forPrint ? 'border-t pt-5' : 'border-t pt-6 md:pt-8'}>
-        <p className="text-xs md:text-sm text-gray-600">
+        {/* <p className="text-xs md:text-sm text-gray-600">
           <strong>{t('invoice.paymentTermsLabel')}:</strong> {t('invoice.paymentTerms')}
-        </p>
+        </p> */}
         {user.paymentProvider && (
           <p className="text-xs md:text-sm text-gray-600 mt-2">
             <strong>{t('invoice.paymentMethodLabel')}:</strong>{' '}
-            {user.paymentProvider === 'paypal' ? 'PayPal' : user.paymentProvider === 'stripe' ? 'Stripe' : t('invoice.paymentMethod')}
+            {user.paymentProvider === 'paypal'
+              ? 'PayPal'
+              : user.paymentProvider === 'stripe'
+                ? 'Stripe'
+                : t('invoice.paymentMethod')}
           </p>
         )}
         <p

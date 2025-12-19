@@ -54,13 +54,27 @@ export function InvoiceViewModal({
   const created = new Date(invoice.createdAt)
 
   const modal = (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
-      <div className="fixed inset-0 bg-black/50 overlay-blur" onClick={onClose} />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className="fixed inset-0 bg-black/50 overlay-blur"
+        onClick={onClose}
+      />
 
       <div className="relative bg-background border rounded-xl shadow-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b backdrop-blur supports-[backdrop-filter]:bg-background/70">
-          <h2 className="text-base font-semibold">{t('invoices.title')} {invoice.number}</h2>
-          <button className="text-sm underline" onClick={onClose}>{t('common.close')}</button>
+          <h2 className="text-base font-semibold">
+            {t('invoices.title')} {invoice.number}
+          </h2>
+          <button
+            className="text-sm underline"
+            onClick={onClose}
+          >
+            {t('common.close')}
+          </button>
         </div>
 
         <div className="p-6">
@@ -68,16 +82,29 @@ export function InvoiceViewModal({
             <div>
               <h3 className="text-xl font-semibold">{t('invoices.title')}</h3>
               <p className="text-sm text-muted-foreground">
-                {t('invoices.status')}: {invoice.status} • {t('invoices.date')}: {formatDate(created)}
+                {t('invoices.status')}: {invoice.status} • {t('invoices.date')}:{' '}
+                {formatDate(created)}
               </p>
-              <p className="text-sm text-muted-foreground">{t('invoices.invoiceNumber')}: {invoice.number}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('invoices.invoiceNumber')}: {invoice.number}
+              </p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-muted-foreground">{t('invoices.billTo')}</p>
-              <p className="font-medium">{invoice.client?.name ?? t('invoices.client')}</p>
-              {invoice.client?.company && <p className="text-sm">{invoice.client.company}</p>}
-              {invoice.client?.address && <p className="text-sm">{invoice.client.address}</p>}
-              {invoice.client?.email && <p className="text-sm">{invoice.client.email}</p>}
+              <p className="text-sm text-muted-foreground">
+                {t('invoices.billTo')}
+              </p>
+              <p className="font-medium">
+                {invoice.client?.name ?? t('invoices.client')}
+              </p>
+              {invoice.client?.company && (
+                <p className="text-sm">{invoice.client.company}</p>
+              )}
+              {invoice.client?.address && (
+                <p className="text-sm">{invoice.client.address}</p>
+              )}
+              {invoice.client?.email && (
+                <p className="text-sm">{invoice.client.email}</p>
+              )}
             </div>
           </div>
 
@@ -85,7 +112,9 @@ export function InvoiceViewModal({
             <table className="w-full text-sm">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="text-left py-3 px-4">{t('common.description')}</th>
+                  <th className="text-left py-3 px-4">
+                    {t('common.description')}
+                  </th>
                   <th className="text-left py-3 px-4">{t('invoices.date')}</th>
                   <th className="text-right py-3 px-4">{t('common.amount')}</th>
                 </tr>
@@ -93,7 +122,10 @@ export function InvoiceViewModal({
               <tbody>
                 {invoice.items && invoice.items.length > 0 ? (
                   invoice.items.map((it) => (
-                    <tr key={it.id} className="border-t">
+                    <tr
+                      key={it.id}
+                      className="border-t"
+                    >
                       <td className="py-3 px-4">{it.description}</td>
                       <td className="py-3 px-4 text-muted-foreground">
                         {it.date ? formatDate(it.date) : '-'}
@@ -105,7 +137,10 @@ export function InvoiceViewModal({
                   ))
                 ) : (
                   <tr className="border-t">
-                    <td className="py-3 px-4 text-center text-muted-foreground" colSpan={3}>
+                    <td
+                      className="py-3 px-4 text-center text-muted-foreground"
+                      colSpan={3}
+                    >
                       {t('invoices.noInvoices')}
                     </td>
                   </tr>
@@ -113,8 +148,13 @@ export function InvoiceViewModal({
               </tbody>
               <tfoot>
                 <tr>
-                  <td className="py-3 px-4" colSpan={2}>
-                    <span className="text-sm text-muted-foreground">{t('invoices.total')}</span>
+                  <td
+                    className="py-3 px-4"
+                    colSpan={2}
+                  >
+                    <span className="text-sm text-muted-foreground">
+                      {t('invoices.total')}
+                    </span>
                   </td>
                   <td className="py-3 px-4 text-right text-base font-semibold">
                     {Number(invoice.total).toFixed(2)} $
@@ -125,7 +165,7 @@ export function InvoiceViewModal({
           </div>
 
           <div className="text-sm text-muted-foreground">
-            <p className="mb-1">{t('invoice.paymentTermsLabel')}</p>
+            {/* <p className="mb-1">{t('invoice.paymentTermsLabel')}</p> */}
             <p>{t('invoices.thankYou')}</p>
           </div>
         </div>

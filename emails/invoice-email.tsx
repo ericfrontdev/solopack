@@ -47,7 +47,9 @@ export default function InvoiceEmail({
   return (
     <Html>
       <Head />
-      <Preview>Facture {invoiceNumber} - Montant: {total.toFixed(2)} $</Preview>
+      <Preview>
+        Facture {invoiceNumber} - Montant: {total.toFixed(2)} $
+      </Preview>
       <Body style={main}>
         <Container style={container}>
           {/* Header avec info expéditeur */}
@@ -72,7 +74,9 @@ export default function InvoiceEmail({
                 <tr>
                   <th style={tableHeader}>Description</th>
                   <th style={tableHeader}>Date</th>
-                  <th style={{ ...tableHeader, textAlign: 'right' }}>Montant</th>
+                  <th style={{ ...tableHeader, textAlign: 'right' }}>
+                    Montant
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -91,7 +95,10 @@ export default function InvoiceEmail({
               <tfoot>
                 {hasTaxes && (
                   <tr>
-                    <td colSpan={2} style={tableCell}>
+                    <td
+                      colSpan={2}
+                      style={tableCell}
+                    >
                       Sous-total
                     </td>
                     <td style={{ ...tableCell, textAlign: 'right' }}>
@@ -101,7 +108,10 @@ export default function InvoiceEmail({
                 )}
                 {hasTaxes && tps > 0 && (
                   <tr>
-                    <td colSpan={2} style={tableCell}>
+                    <td
+                      colSpan={2}
+                      style={tableCell}
+                    >
                       TPS (5%)
                     </td>
                     <td style={{ ...tableCell, textAlign: 'right' }}>
@@ -111,7 +121,10 @@ export default function InvoiceEmail({
                 )}
                 {hasTaxes && tvq > 0 && (
                   <tr>
-                    <td colSpan={2} style={tableCell}>
+                    <td
+                      colSpan={2}
+                      style={tableCell}
+                    >
                       TVQ (9,975%)
                     </td>
                     <td style={{ ...tableCell, textAlign: 'right' }}>
@@ -120,10 +133,20 @@ export default function InvoiceEmail({
                   </tr>
                 )}
                 <tr>
-                  <td colSpan={2} style={{ ...tableCell, fontWeight: 'bold' }}>
+                  <td
+                    colSpan={2}
+                    style={{ ...tableCell, fontWeight: 'bold' }}
+                  >
                     Total
                   </td>
-                  <td style={{ ...tableCell, textAlign: 'right', fontWeight: 'bold', fontSize: '18px' }}>
+                  <td
+                    style={{
+                      ...tableCell,
+                      textAlign: 'right',
+                      fontWeight: 'bold',
+                      fontSize: '18px',
+                    }}
+                  >
                     {total.toFixed(2)} $
                   </td>
                 </tr>
@@ -132,24 +155,31 @@ export default function InvoiceEmail({
           </Section>
 
           {paymentUrl && (
-            <Section style={{ padding: '0 48px', textAlign: 'center', margin: '32px 0' }}>
+            <Section
+              style={{
+                padding: '0 48px',
+                textAlign: 'center',
+                margin: '32px 0',
+              }}
+            >
               <Button
                 href={paymentUrl}
                 style={payButton}
               >
                 Payer cette facture
               </Button>
-              <Text style={{ fontSize: '14px', color: '#666', marginTop: '12px' }}>
-                Cliquez sur le bouton ci-dessus pour payer en ligne de manière sécurisée.
+              <Text
+                style={{ fontSize: '14px', color: '#666', marginTop: '12px' }}
+              >
+                Cliquez sur le bouton ci-dessus pour payer en ligne de manière
+                sécurisée.
               </Text>
             </Section>
           )}
 
           <Hr style={hr} />
 
-          <Text style={footer}>
-            Conditions de paiement: Payable à réception. Merci de votre confiance.
-          </Text>
+          <Text style={footer}>Merci de votre confiance.</Text>
         </Container>
       </Body>
     </Html>
@@ -158,7 +188,8 @@ export default function InvoiceEmail({
 
 const main = {
   backgroundColor: '#f6f9fc',
-  fontFamily: '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
+  fontFamily:
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 }
 
 const container = {
