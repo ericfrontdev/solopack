@@ -1198,7 +1198,16 @@
     "reply": "Reply",
     "writeMessage": "Write a message",
     "send": "Send",
-    "cannotSendMessage": "It is no longer possible to send messages"
+    "cannotSendMessage": "It is no longer possible to send messages",
+    "unread": "unread"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "justNow": "Just now",
+    "minutesAgo": "min",
+    "hoursAgo": "h"
   },
   "betaEnd": {
     "title": "Beta Period Ended",

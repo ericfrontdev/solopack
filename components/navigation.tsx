@@ -11,6 +11,7 @@ import { UserMenu } from '@/components/user-menu'
 import { UserNotificationBadge } from '@/components/user-notification-badge'
 import { AdminNotificationBadge } from '@/components/admin-notification-badge'
 import { LanguageSelector } from '@/components/language-selector'
+import { NotificationDropdown } from '@/components/notification-dropdown'
 
 export function Navigation({
   user,
@@ -149,6 +150,13 @@ export function Navigation({
               {/* Language Selector */}
               <LanguageSelector />
 
+              {/* Notification Dropdown */}
+              {user && <NotificationDropdown />}
+
+              {/* Feedback Notification Badge */}
+              {user && !isSuperAdmin && <UserNotificationBadge />}
+              {user && isSuperAdmin && <AdminNotificationBadge />}
+
               {/* Theme Toggle */}
               <Button
                 className="cursor-pointer"
@@ -176,6 +184,7 @@ export function Navigation({
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
+            {user && <NotificationDropdown />}
             {user && !isSuperAdmin && <UserNotificationBadge />}
             {user && isSuperAdmin && <AdminNotificationBadge />}
 

@@ -82,12 +82,25 @@ export async function POST(
       })
     }
 
+    // Créer une notification pour l'utilisateur
+    const userId = agreement.project.client.userId
+    const clientName = agreement.project.client.name
+    const projectName = agreement.project.name
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        type: 'payment_agreement_confirmed',
+        title: 'Entente de paiement confirmée',
+        message: `${clientName} a confirmé l'entente de paiement pour le projet "${projectName}"`,
+        link: `/projets/${agreement.projectId}`,
+      },
+    })
+
     // Envoyer une notification email à l'utilisateur
     try {
       const userEmail = agreement.project.client.user.email
       const userName = agreement.project.client.user.name
-      const clientName = agreement.project.client.name
-      const projectName = agreement.project.name
 
       if (userEmail) {
         await resend.emails.send({

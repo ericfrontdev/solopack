@@ -428,3 +428,19 @@ model PaymentAgreement {
   @@index([token])
   @@index([status])
 }
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   // Utilisateur qui reçoit la notification
+  type      String   // "payment_agreement_confirmed", "invoice_paid", etc.
+  title     String   // Titre court de la notification
+  message   String   // Message descriptif
+  link      String?  // Lien optionnel vers la ressource concernée
+  read      Boolean  @default(false) // Lu ou non
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@index([userId, read]) // Index composite pour compter les non-lus
+}
