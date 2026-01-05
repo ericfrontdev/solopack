@@ -64,7 +64,10 @@ export function ProjectCard({
     paused: t('projects.onHold'),
     cancelled: t('projects.cancelled'),
   }
-  const totalInvoiced = project.invoices.reduce((sum, inv) => sum + inv.total, 0)
+  // Ne compter que les factures payées
+  const totalInvoiced = project.invoices
+    .filter((inv) => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.total, 0)
   const percentageBudget = project.budget
     ? Math.round((totalInvoiced / project.budget) * 100)
     : 0

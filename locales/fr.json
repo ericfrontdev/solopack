@@ -475,7 +475,24 @@
     "statusActive": "Actif",
     "statusCompleted": "Terminé",
     "statusOnHold": "En pause",
-    "statusCancelled": "Annulé"
+    "statusCancelled": "Annulé",
+    "paymentPlan": {
+      "question": "Paiement en versements ?",
+      "numberOfInstallments": "Nombre de versements",
+      "frequency": "Fréquence des versements",
+      "frequency7Days": "7 jours",
+      "frequency14Days": "14 jours",
+      "frequency30Days": "30 jours",
+      "agreement": "Entente de paiement",
+      "confirmed": "Confirmée",
+      "pending": "En attente",
+      "amountPerInstallment": "Montant par versement",
+      "frequencyLabel": "Fréquence",
+      "confirmedOn": "Confirmée le",
+      "pendingConfirmation": "Cette entente est en attente de confirmation par le client",
+      "resendAgreement": "Renvoyer l'entente",
+      "sendingAgreement": "Envoi en cours..."
+    }
   },
   "accounting": {
     "title": "Comptabilité",

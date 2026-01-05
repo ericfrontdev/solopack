@@ -53,10 +53,10 @@ export function ProjectList({
         </thead>
         <tbody>
           {projects.map((project) => {
-            const totalInvoiced = project.invoices.reduce(
-              (sum, inv) => sum + inv.total,
-              0
-            )
+            // Ne compter que les factures payées
+            const totalInvoiced = project.invoices
+              .filter((inv) => inv.status === 'paid')
+              .reduce((sum, inv) => sum + inv.total, 0)
             return (
               <tr key={project.id} className="border-t hover:bg-muted/50">
                 <td className="p-3 font-medium">{project.name}</td>

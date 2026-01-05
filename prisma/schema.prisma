@@ -219,18 +219,19 @@ model InvoiceItem {
 }
 
 model Project {
-  id          String        @id @default(cuid())
-  name        String
-  description String?
-  status      String        @default("active")
-  budget      Float?
-  startDate   DateTime?
-  endDate     DateTime?
-  createdAt   DateTime      @default(now())
-  clientId    String
-  client      Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  invoices    Invoice[]
-  files       ProjectFile[]
+  id               String            @id @default(cuid())
+  name             String
+  description      String?
+  status           String            @default("active")
+  budget           Float?
+  startDate        DateTime?
+  endDate          DateTime?
+  createdAt        DateTime          @default(now())
+  clientId         String
+  client           Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  invoices         Invoice[]
+  files            ProjectFile[]
+  paymentAgreement PaymentAgreement?
 
   @@index([clientId])
   @@index([status])
@@ -407,4 +408,23 @@ model InvitationCode {
   @@index([code])
   @@index([type])
   @@index([active])
+}
+
+model PaymentAgreement {
+  id                   String    @id @default(cuid())
+  projectId            String    @unique // Une seule entente par projet
+  numberOfInstallments Int       // Nombre de versements (1-10)
+  frequency            Int       // Fréquence en jours (7, 14, 30)
+  amountPerInstallment Float     // Montant par versement
+  status               String    @default("pending") // "pending", "confirmed", "cancelled"
+  token                String    @unique // Token de confirmation sécurisé
+  confirmedAt          DateTime? // Date de confirmation par le client
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  project              Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([token])
+  @@index([status])
 }

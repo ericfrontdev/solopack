@@ -111,7 +111,11 @@ export function ProjectsTab({
     setIsUploadModalOpen(true)
   }
 
-  const handleSaveProject = async (data: { name: string; description: string | null; status: string; budget: string | number | null; startDate: string | null; endDate: string | null }, files: File[]) => {
+  const handleSaveProject = async (
+    data: { name: string; description: string | null; status: string; budget: string | number | null; startDate: string | null; endDate: string | null },
+    files: File[],
+    paymentPlan?: { numberOfInstallments: number; frequency: number }
+  ) => {
     const url = editingProject
       ? `/api/projects/${editingProject.id}`
       : `/api/projects`
@@ -120,7 +124,7 @@ export function ProjectsTab({
 
     const body = editingProject
       ? data
-      : { ...data, clientId: client.id }
+      : { ...data, clientId: client.id, paymentPlan }
 
     const res = await fetch(url, {
       method,

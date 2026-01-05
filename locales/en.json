@@ -516,7 +516,24 @@
     "statusCompleted": "Completed",
     "statusOnHold": "On Hold",
     "statusCancelled": "Cancelled",
-    "invoices": "Invoices"
+    "invoices": "Invoices",
+    "paymentPlan": {
+      "question": "Payment in installments?",
+      "numberOfInstallments": "Number of installments",
+      "frequency": "Installment frequency",
+      "frequency7Days": "7 days",
+      "frequency14Days": "14 days",
+      "frequency30Days": "30 days",
+      "agreement": "Payment Agreement",
+      "confirmed": "Confirmed",
+      "pending": "Pending",
+      "amountPerInstallment": "Amount per installment",
+      "frequencyLabel": "Frequency",
+      "confirmedOn": "Confirmed on",
+      "pendingConfirmation": "This agreement is pending confirmation by the client",
+      "resendAgreement": "Resend agreement",
+      "sendingAgreement": "Sending..."
+    }
   },
   "accounting": {
     "title": "Accounting",

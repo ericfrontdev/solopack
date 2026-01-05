@@ -5,6 +5,8 @@ import { render } from '@react-email/render'
 import InvoiceEmail from '@/emails/invoice-email'
 import { auth } from '@/auth'
 
+const INVOICE_FROM_EMAIL = process.env.INVOICE_FROM_EMAIL || process.env.EMAIL_FROM || 'invoices@solopack.app'
+
 export async function POST(req: Request) {
   try {
     // Check authentication
@@ -93,10 +95,9 @@ export async function POST(req: Request) {
     try {
       // Utiliser le nom de l'entreprise si disponible, sinon le nom de l'utilisateur
       const senderName = invoice.client.user.company || invoice.client.user.name || 'SoloPack'
-      const emailFrom = process.env.EMAIL_FROM || 'onboarding@resend.dev'
 
       const { data, error } = await resend.emails.send({
-        from: `${senderName} <${emailFrom}>`,
+        from: `${senderName} <${INVOICE_FROM_EMAIL}>`,
         to: invoice.client.email,
         subject: `Facture ${invoice.number}`,
         html: emailHtml,

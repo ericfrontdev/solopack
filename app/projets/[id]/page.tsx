@@ -28,6 +28,7 @@ async function getProject(projectId: string, userId: string) {
       files: {
         orderBy: { uploadedAt: 'desc' },
       },
+      paymentAgreement: true,
       _count: {
         select: {
           invoices: true,

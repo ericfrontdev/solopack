@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     // Initialiser Stripe avec la clé de l'utilisateur
     const stripe = new Stripe(invoice.client.user.stripeSecretKey, {
-      apiVersion: '2025-09-30.clover',
+      apiVersion: '2025-10-29.clover',
     })
 
     console.log('[create-stripe-session] Creating session:', {

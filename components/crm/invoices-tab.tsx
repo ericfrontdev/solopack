@@ -139,7 +139,10 @@ export function InvoicesTab({
     (inv) => inv.status === 'archived'
   )
 
-  const totalInvoiced = client.invoices.reduce((sum, inv) => sum + inv.total, 0)
+  // Ne compter que les factures payées
+  const totalInvoiced = client.invoices
+    .filter((inv) => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.total, 0)
   const totalPaid = client.invoices
     .filter((inv) => inv.status === 'paid')
     .reduce((sum, inv) => sum + inv.total, 0)

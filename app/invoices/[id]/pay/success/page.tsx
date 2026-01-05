@@ -38,7 +38,7 @@ async function getInvoice(id: string) {
 async function verifyAndUpdatePayment(invoiceId: string, sessionId: string, stripeSecretKey: string) {
   try {
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2025-09-30.clover',
+      apiVersion: '2025-10-29.clover',
     })
 
     // Récupérer la session Stripe pour vérifier le paiement

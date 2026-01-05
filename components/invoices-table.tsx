@@ -551,8 +551,8 @@ export function InvoicesTable({ invoices, showProject = false }: { invoices: Inv
                           </DropdownMenuItem>
                         )}
 
-                        {/* Marquer payée (si non-paid et non-draft) */}
-                        {inv.status !== 'paid' && inv.status !== 'draft' && (
+                        {/* Marquer payée (si non-paid) */}
+                        {inv.status !== 'paid' && (
                           <DropdownMenuItem
                             onClick={() => doAction(inv.id, 'paid')}
                             disabled={busyId === inv.id}

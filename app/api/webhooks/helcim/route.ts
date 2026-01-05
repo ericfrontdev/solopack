@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 import { Resend } from 'resend'
 
+const INVOICE_FROM_EMAIL = process.env.INVOICE_FROM_EMAIL || process.env.EMAIL_FROM || 'invoices@solopack.app'
+
 // Configuration pour désactiver le body parsing automatique
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -118,7 +120,7 @@ export async function POST(req: NextRequest) {
 
       // Envoyer un email de confirmation au client
       try {
-        if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+        if (!process.env.RESEND_API_KEY || !INVOICE_FROM_EMAIL) {
           console.error('[helcim-webhook] Email configuration missing')
         } else if (!invoice.client.email) {
           console.error('[helcim-webhook] Client email not found')
@@ -132,7 +134,7 @@ export async function POST(req: NextRequest) {
           }).format(new Date())
 
           await resend.emails.send({
-            from: process.env.EMAIL_FROM,
+            from: INVOICE_FROM_EMAIL,
             to: invoice.client.email,
             subject: `Confirmation de paiement - Facture ${invoice.number}`,
             html: `

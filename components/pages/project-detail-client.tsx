@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { ProjectActions } from '@/components/project-actions'
 import { ProjectFilesList } from '@/components/project-files-list'
 import { ProjectInvoicesList } from '@/components/project-invoices-list'
+import { PaymentAgreementSection } from '@/components/payment-agreement-section'
 import { useTranslation } from '@/lib/i18n-context'
 
 type InvoiceItem = {
@@ -51,6 +52,16 @@ type ProjectWithRelations = {
     mimeType: string
     uploadedAt: Date
   }>
+  paymentAgreement: {
+    id: string
+    numberOfInstallments: number
+    frequency: number
+    amountPerInstallment: number
+    status: string
+    confirmedAt: Date | null
+    createdAt: Date
+    token: string
+  } | null
   _count: {
     invoices: number
     files: number
@@ -74,7 +85,10 @@ export function ProjectDetailClient({ project }: { project: ProjectWithRelations
     cancelled: t('projects.statusCancelled'),
   }
 
-  const totalInvoiced = project.invoices.reduce((sum, inv) => sum + inv.total, 0)
+  // Ne compter que les factures payées
+  const totalInvoiced = project.invoices
+    .filter((inv) => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.total, 0)
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-6">
@@ -197,6 +211,15 @@ export function ProjectDetailClient({ project }: { project: ProjectWithRelations
           </div>
         )}
       </div>
+
+      {/* Payment Agreement */}
+      {project.paymentAgreement && (
+        <PaymentAgreementSection
+          agreement={project.paymentAgreement}
+          projectName={project.name}
+          clientEmail={project.client.email}
+        />
+      )}
 
       {/* Invoices */}
       <ProjectInvoicesList

@@ -91,14 +91,21 @@ export function ProjectsGlobalView({ projects, clients }: { projects: Project[];
 
   const handleSaveProject = async (
     data: { name: string; description: string | null; status: string; budget: string | number | null; startDate: string | null; endDate: string | null },
-    files: File[]
+    files: File[],
+    paymentPlan?: { numberOfInstallments: number; frequency: number }
   ) => {
     if (!selectedClient) return
+
+    console.log('handleSaveProject called with paymentPlan:', paymentPlan)
 
     const res = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...data, clientId: selectedClient.id }),
+      body: JSON.stringify({
+        ...data,
+        clientId: selectedClient.id,
+        paymentPlan
+      }),
     })
 
     if (res.ok) {
