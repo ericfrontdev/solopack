@@ -11,7 +11,6 @@ export default function ConfirmAgreementPage() {
   const [loading, setLoading] = useState(true)
   const [confirmed, setConfirmed] = useState(false)
   const [error, setError] = useState('')
-  const [agreementData, setAgreementData] = useState<any>(null)
 
   useEffect(() => {
     // Confirmer automatiquement l'entente au chargement de la page
@@ -38,7 +37,6 @@ export default function ConfirmAgreementPage() {
 
       if (response.ok) {
         setConfirmed(true)
-        setAgreementData(data.agreement)
       } else {
         setError(data.error || 'Une erreur est survenue')
       }
@@ -73,7 +71,7 @@ export default function ConfirmAgreementPage() {
               <CheckCircle2 className="h-20 w-20 text-green-500 mx-auto mb-6" />
               <h1 className="text-3xl font-bold mb-4">Entente confirmée !</h1>
               <p className="text-lg text-muted-foreground mb-6">
-                Merci d'avoir confirmé l'entente de paiement.
+                Merci d&apos;avoir confirmé l&apos;entente de paiement.
               </p>
               <div className="bg-muted/50 rounded-lg p-6 mb-6 text-left">
                 <h2 className="font-semibold mb-3">Prochaines étapes :</h2>
@@ -84,7 +82,7 @@ export default function ConfirmAgreementPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-0.5">✓</span>
-                    <span>Les dates de paiement ont été calculées à partir d'aujourd'hui</span>
+                    <span>Les dates de paiement ont été calculées à partir d&apos;aujourd&apos;hui</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-primary mt-0.5">✓</span>

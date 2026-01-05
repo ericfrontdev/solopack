@@ -171,7 +171,7 @@ export async function POST(request: Request) {
     const token = crypto.randomBytes(32).toString('hex')
 
     // Créer l'entente de paiement
-    const agreement = await prisma.paymentAgreement.create({
+    await prisma.paymentAgreement.create({
       data: {
         projectId: project.id,
         numberOfInstallments,

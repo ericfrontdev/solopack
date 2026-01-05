@@ -17,7 +17,7 @@ type PaymentAgreement = {
   token: string
 }
 
-function getFrequencyText(frequency: number, t: any): string {
+function getFrequencyText(frequency: number, t: (key: string) => string): string {
   switch (frequency) {
     case 7:
       return t('projects.paymentPlan.frequency7Days')
@@ -32,14 +32,12 @@ function getFrequencyText(frequency: number, t: any): string {
 
 export function PaymentAgreementSection({
   agreement,
-  projectName,
   clientEmail,
 }: {
   agreement: PaymentAgreement
-  projectName: string
+  projectName?: string
   clientEmail: string
 }) {
-  const router = useRouter()
   const [sending, setSending] = useState(false)
   const { t, locale } = useTranslation()
 
@@ -55,7 +53,7 @@ export function PaymentAgreementSection({
       } else {
         alert('Erreur lors de l\'envoi de l\'entente')
       }
-    } catch (error) {
+    } catch {
       alert('Erreur lors de l\'envoi de l\'entente')
     } finally {
       setSending(false)
