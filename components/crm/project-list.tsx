@@ -11,7 +11,7 @@ type Project = {
   budget: number | null
   startDate: Date | null
   endDate: Date | null
-  invoices: Array<{ total: number }>
+  invoices: Array<{ total: number; status: string }>
   files: Array<{ id: string }>
 }
 

@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { FileText, Mail, CheckCircle2, Clock } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/lib/i18n-context'
 
 type PaymentAgreement = {
