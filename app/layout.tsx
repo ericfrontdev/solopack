@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/lib/theme-context'
 import { I18nProvider } from '@/lib/i18n-context'
+import { SWRProvider } from '@/lib/swr-provider'
 import { Navigation } from '@/components/navigation'
 import { FeedbackWidget } from '@/components/feedback-widget'
 import { BetaEndBlocker } from '@/components/beta-end-blocker'
@@ -105,19 +106,21 @@ export default async function RootLayout({
       <body className={inter.className}>
         <ThemeProvider>
           <I18nProvider>
-            <Toaster richColors position="bottom-right" />
-            {isBetaEnded && !isPricingPage ? (
-              <BetaEndBlocker
-                betaEndDate={betaEndDate}
-                isWithin30Days={isWithin30Days}
-              />
-            ) : (
-              <>
-                <Navigation user={session?.user} isSuperAdmin={isAdmin} />
-                <main className="min-h-screen bg-background overflow-x-visible">{children}</main>
-                {session?.user && <FeedbackWidget />}
-              </>
-            )}
+            <SWRProvider>
+              <Toaster richColors position="bottom-right" />
+              {isBetaEnded && !isPricingPage ? (
+                <BetaEndBlocker
+                  betaEndDate={betaEndDate}
+                  isWithin30Days={isWithin30Days}
+                />
+              ) : (
+                <>
+                  <Navigation user={session?.user} isSuperAdmin={isAdmin} />
+                  <main className="min-h-screen bg-background overflow-x-visible">{children}</main>
+                  {session?.user && <FeedbackWidget />}
+                </>
+              )}
+            </SWRProvider>
           </I18nProvider>
         </ThemeProvider>
       </body>

@@ -168,3 +168,34 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Erreur lors de la création de la facture.' }, { status: 500 })
   }
 }
+
+export async function GET() {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
+    }
+
+    const invoices = await prisma.invoice.findMany({
+      where: {
+        client: {
+          userId: session.user.id,
+        },
+      },
+      include: {
+        items: true,
+        client: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    })
+
+    return NextResponse.json(invoices)
+  } catch {
+    return NextResponse.json(
+      { error: 'Erreur lors de la récupération des factures.' },
+      { status: 500 },
+    )
+  }
+}

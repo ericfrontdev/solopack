@@ -76,6 +76,15 @@ export async function GET(request: Request) {
           status: true,
         },
       },
+      files: {
+        select: {
+          id: true,
+          filename: true,
+          fileSize: true,
+          uploadedAt: true,
+        },
+      },
+      paymentAgreement: true,
     },
     orderBy: { createdAt: 'desc' },
   })

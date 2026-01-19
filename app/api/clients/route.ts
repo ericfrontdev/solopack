@@ -13,6 +13,13 @@ export async function GET() {
       where: {
         userId: session.user.id,
       },
+      include: {
+        _count: {
+          select: {
+            invoices: true,
+          },
+        },
+      },
       orderBy: {
         name: 'asc',
       },

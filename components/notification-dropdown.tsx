@@ -5,49 +5,16 @@ import { Bell, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n-context'
 import { Button } from '@/components/ui/button'
-
-type Notification = {
-  id: string
-  type: string
-  title: string
-  message: string
-  link: string | null
-  read: boolean
-  createdAt: string
-}
+import { useNotifications, useUnreadCount } from '@/hooks/use-notifications'
 
 export function NotificationDropdown() {
   const { t, locale } = useTranslation()
-  const [unreadCount, setUnreadCount] = useState(0)
-  const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Fetch unread count
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await fetch('/api/notifications/unread-count')
-      const data = await response.json()
-      setUnreadCount(data.count || 0)
-    } catch (error) {
-      console.error('Error fetching unread count:', error)
-    }
-  }
-
-  // Fetch notifications
-  const fetchNotifications = async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/notifications?limit=10')
-      const data = await response.json()
-      setNotifications(data)
-    } catch (error) {
-      console.error('Error fetching notifications:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Use SWR hooks
+  const { count, mutate: mutateCount } = useUnreadCount()
+  const { notifications, isLoading, mutate: mutateNotifications } = useNotifications(10)
 
   // Mark all as read
   const markAllAsRead = async () => {
@@ -56,29 +23,17 @@ export function NotificationDropdown() {
         method: 'PATCH',
       })
       if (response.ok) {
-        setUnreadCount(0)
-        setNotifications((prev) =>
-          prev.map((notif) => ({ ...notif, read: true }))
+        // Optimistically update the cache
+        mutateCount({ count: 0 }, false)
+        mutateNotifications(
+          notifications?.map((notif) => ({ ...notif, read: true })),
+          false
         )
       }
     } catch (error) {
       console.error('Error marking notifications as read:', error)
     }
   }
-
-  // Poll for unread count
-  useEffect(() => {
-    fetchUnreadCount()
-    const interval = setInterval(fetchUnreadCount, 30000)
-    return () => clearInterval(interval)
-  }, [])
-
-  // Fetch notifications when dropdown opens
-  useEffect(() => {
-    if (isOpen) {
-      fetchNotifications()
-    }
-  }, [isOpen])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -131,9 +86,9 @@ export function NotificationDropdown() {
         title={t('notifications.title') || 'Notifications'}
       >
         <Bell className="h-5 w-5 text-muted-foreground" />
-        {unreadCount > 0 && (
+        {count > 0 && (
           <span className="absolute top-0 right-0 flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-500 rounded-full border-2 border-background">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {count > 9 ? '9+' : count}
           </span>
         )}
       </button>
@@ -146,7 +101,7 @@ export function NotificationDropdown() {
             <h3 className="font-semibold">
               {t('notifications.title') || 'Notifications'}
             </h3>
-            {unreadCount > 0 && (
+            {count > 0 && (
               <Button
                 onClick={markAllAsRead}
                 variant="ghost"
@@ -165,7 +120,7 @@ export function NotificationDropdown() {
               <div className="p-4 text-center text-muted-foreground">
                 {t('common.loading') || 'Chargement...'}
               </div>
-            ) : notifications.length === 0 ? (
+            ) : !notifications || notifications.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-2 opacity-20" />
                 <p>{t('notifications.noNotifications') || 'Aucune notification'}</p>
