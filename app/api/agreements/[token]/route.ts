@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function GET(
   request: Request,
@@ -38,7 +39,7 @@ export async function GET(
 
     return NextResponse.json(agreement)
   } catch (error) {
-    console.error('Error fetching agreement:', error)
+    logger.error('Error fetching agreement:', error)
     return NextResponse.json(
       { error: 'Une erreur est survenue' },
       { status: 500 }

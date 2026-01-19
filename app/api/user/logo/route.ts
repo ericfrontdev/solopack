@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: Request) {
   try {
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ logoUrl }, { status: 200 })
   } catch (error) {
-    console.error('Error uploading logo:', error)
+    logger.error('Error uploading logo:', error)
     return NextResponse.json({
       error: 'Erreur lors de l\'upload du logo',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -63,7 +64,7 @@ export async function DELETE() {
 
     return NextResponse.json({ success: true }, { status: 200 })
   } catch (error) {
-    console.error('Error deleting logo:', error)
+    logger.error('Error deleting logo:', error)
     return NextResponse.json({ error: 'Erreur lors de la suppression du logo' }, { status: 500 })
   }
 }

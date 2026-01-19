@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { logger } from '@/lib/logger'
 
 export async function PATCH(
   req: Request,
@@ -55,7 +56,7 @@ export async function PATCH(
 
     return NextResponse.json(unpaidAmount, { status: 200 })
   } catch (e) {
-    console.error('[unpaid-amounts:PATCH] Error:', e)
+    logger.error('[unpaid-amounts:PATCH] Error:', e)
     return NextResponse.json(
       { error: 'Erreur lors de la modification du montant' },
       { status: 500 }

@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { PaymentSuccessPageClient } from '@/components/pages/payment-success-page-client'
 import Stripe from 'stripe'
 import { decrypt } from '@/lib/crypto'
+import { logger } from '@/lib/logger'
 
 async function getInvoice(id: string) {
   const invoice = await prisma.invoice.findUnique({
@@ -68,7 +69,7 @@ async function verifyAndUpdatePayment(invoiceId: string, sessionId: string, stri
 
     return false
   } catch (error) {
-    console.error('[payment-success] Error verifying payment:', error)
+    logger.error('[payment-success] Error verifying payment:', error)
     return false
   }
 }
@@ -90,7 +91,7 @@ export default async function PaymentSuccessPage(props: {
       // Rediriger pour rafraîchir les données
       redirect(`/invoices/${params.id}/pay/success`)
     } catch (error) {
-      console.error('[payment-success] Error decrypting Stripe key:', error)
+      logger.error('[payment-success] Error decrypting Stripe key:', error)
       // Continue without verification if decryption fails
     }
   }

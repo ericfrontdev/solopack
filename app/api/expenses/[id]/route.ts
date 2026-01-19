@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function PUT(
   req: NextRequest,
@@ -38,7 +39,7 @@ export async function PUT(
 
     return NextResponse.json(expense)
   } catch (error) {
-    console.error('Error updating expense:', error)
+    logger.error('Error updating expense:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour de la dépense' },
       { status: 500 }
@@ -74,7 +75,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Dépense supprimée' })
   } catch (error) {
-    console.error('Error deleting expense:', error)
+    logger.error('Error deleting expense:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression de la dépense' },
       { status: 500 }

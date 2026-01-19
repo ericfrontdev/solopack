@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { v2 as cloudinary } from 'cloudinary'
 import { rateLimit, getRateLimitHeaders } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 // Configuration Cloudinary
 cloudinary.config({
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
       { headers: rateLimitHeaders }
     )
   } catch (error) {
-    console.error('Error uploading to Cloudinary:', error)
+    logger.error('Error uploading to Cloudinary:', error)
     return NextResponse.json(
       { error: 'Erreur lors de l\'upload de l\'image' },
       { status: 500 }

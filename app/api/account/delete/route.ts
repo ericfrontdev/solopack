@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function POST() {
   try {
@@ -27,7 +28,7 @@ export async function POST() {
       message: 'Compte supprimé avec succès',
     })
   } catch (error) {
-    console.error('Erreur lors de la suppression du compte:', error)
+    logger.error('Erreur lors de la suppression du compte:', error)
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }

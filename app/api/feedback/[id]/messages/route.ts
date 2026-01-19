@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { sendFeedbackMessageNotification } from '@/lib/feedback-emails'
+import { logger } from '@/lib/logger'
 
 // GET /api/feedback/[id]/messages - Récupérer les messages d'un feedback
 export async function GET(
@@ -52,7 +53,7 @@ export async function GET(
 
     return NextResponse.json(messages)
   } catch (error) {
-    console.error('Error fetching feedback messages:', error)
+    logger.error('Error fetching feedback messages:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des messages' },
       { status: 500 }
@@ -140,12 +141,12 @@ export async function POST(
 
     // Send email notification (don't await to avoid blocking response)
     sendFeedbackMessageNotification(id, newMessage.id).catch((error) => {
-      console.error('Failed to send message notification email:', error)
+      logger.error('Failed to send message notification email:', error)
     })
 
     return NextResponse.json(newMessage, { status: 201 })
   } catch (error) {
-    console.error('Error creating feedback message:', error)
+    logger.error('Error creating feedback message:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la création du message' },
       { status: 500 }

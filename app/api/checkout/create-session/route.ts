@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import { logger } from '@/lib/logger'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-10-29.clover',
@@ -92,7 +93,7 @@ export async function POST() {
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (error) {
-    console.error('Error creating checkout session:', error)
+    logger.error('Error creating checkout session:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la création de la session de paiement' },
       { status: 500 }

@@ -12,6 +12,7 @@ import { auth } from '@/auth'
 import { isSuperAdmin } from '@/lib/check-super-admin'
 import { prisma } from '@/lib/prisma'
 import { headers } from 'next/headers'
+import { logger } from '@/lib/logger'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -93,7 +94,7 @@ export default async function RootLayout({
         }
       }
     } catch (error) {
-      console.error('Error checking beta status:', error)
+      logger.error('Error checking beta status:', error)
       // En cas d'erreur, on continue sans bloquer l'utilisateur
     }
   }

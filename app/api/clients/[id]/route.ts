@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { ZodError } from 'zod'
 import { validateBody, validateParams, validationError, updateClientSchema, clientIdSchema } from '@/lib/validations'
+import { logger } from '@/lib/logger'
 
 export async function PATCH(
   req: Request,
@@ -43,7 +44,7 @@ export async function PATCH(
     if (error instanceof ZodError) {
       return validationError(error)
     }
-    console.error('[clients:PATCH] Error:', error)
+    logger.error('[clients:PATCH] Error:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la modification du client' },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function DELETE(
     if (error instanceof ZodError) {
       return validationError(error)
     }
-    console.error('[clients:DELETE] Error:', error)
+    logger.error('[clients:DELETE] Error:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du client' },
       { status: 500 }

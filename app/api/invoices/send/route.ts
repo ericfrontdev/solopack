@@ -4,6 +4,7 @@ import { resend } from '@/lib/resend'
 import { render } from '@react-email/render'
 import InvoiceEmail from '@/emails/invoice-email'
 import { auth } from '@/auth'
+import { logger } from '@/lib/logger'
 
 const INVOICE_FROM_EMAIL = process.env.INVOICE_FROM_EMAIL || process.env.EMAIL_FROM || 'invoices@solopack.app'
 
@@ -104,13 +105,13 @@ export async function POST(req: Request) {
       })
 
       if (error) {
-        console.error('[invoices:send] Resend error:', error)
+        logger.error('[invoices:send] Resend error:', error)
         return NextResponse.json({ error: 'Erreur lors de l\'envoi de l\'email', details: error }, { status: 500 })
       }
 
-      console.log('[invoices:send] Email sent successfully:', data)
+      logger.debug('[invoices:send] Email sent successfully:', data)
     } catch (emailError) {
-      console.error('[invoices:send] Failed to send email:', emailError)
+      logger.error('[invoices:send] Failed to send email:', emailError)
       // Continue quand même pour mettre à jour le statut
     }
 
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, invoice: updatedInvoice }, { status: 200 })
   } catch (e) {
-    console.error('[invoices:send] Error:', e)
+    logger.error('[invoices:send] Error:', e)
     return NextResponse.json({ error: "Impossible d'envoyer la facture" }, { status: 500 })
   }
 }

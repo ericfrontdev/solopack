@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import en from '@/locales/en.json'
 import fr from '@/locales/fr.json'
+import { logger } from '@/lib/logger'
 
 type Locale = 'en' | 'fr'
 
@@ -61,7 +62,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       if (value && typeof value === 'object' && k in value) {
         value = (value as Record<string, unknown>)[k]
       } else {
-        console.warn(`Translation key not found: ${key}`)
+        logger.warn(`Translation key not found: ${key}`)
         return key
       }
     }

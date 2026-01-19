@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Resend } from 'resend'
 import PaymentAgreementEmail from '@/emails/payment-agreement-email'
+import { logger } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const PAYMENT_AGREEMENT_FROM_EMAIL = process.env.PAYMENT_AGREEMENT_FROM_EMAIL || process.env.EMAIL_FROM || 'agreements@solopack.app'
@@ -67,7 +68,7 @@ export async function POST(
       message: 'Entente renvoyée avec succès',
     })
   } catch (error) {
-    console.error('Error resending agreement:', error)
+    logger.error('Error resending agreement:', error)
     return NextResponse.json(
       { error: 'Une erreur est survenue lors de l\'envoi de l\'entente' },
       { status: 500 }

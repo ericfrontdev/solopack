@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ProjectModal } from '@/components/crm/project-modal'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 type Project = {
   id: string
@@ -96,7 +97,7 @@ export function ProjectsGlobalView({ projects, clients }: { projects: Project[];
   ) => {
     if (!selectedClient) return
 
-    console.log('handleSaveProject called with paymentPlan:', paymentPlan)
+    logger.debug('handleSaveProject called with paymentPlan:', paymentPlan)
 
     const res = await fetch('/api/projects', {
       method: 'POST',

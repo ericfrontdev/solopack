@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 // GET /api/notifications/unread-count - Get count of unread notifications
 export async function GET() {
@@ -19,7 +20,7 @@ export async function GET() {
 
     return NextResponse.json({ count })
   } catch (error) {
-    console.error('Error fetching unread count:', error)
+    logger.error('Error fetching unread count:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération du nombre de notifications non lues' },
       { status: 500 }

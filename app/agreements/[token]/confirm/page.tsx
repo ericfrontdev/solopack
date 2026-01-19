@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { ThemeLogo } from '@/components/theme-logo'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 export default function ConfirmAgreementPage() {
   const params = useParams()
@@ -25,7 +26,7 @@ export default function ConfirmAgreementPage() {
     setError('')
 
     try {
-      console.log('[confirm] Auto-confirming agreement with token:', token)
+      logger.debug('[confirm] Auto-confirming agreement with token:', token)
 
       // Confirmer l'entente
       const response = await fetch(`/api/agreements/${token}/confirm`, {
@@ -33,7 +34,7 @@ export default function ConfirmAgreementPage() {
       })
 
       const data = await response.json()
-      console.log('[confirm] Confirmation response:', data)
+      logger.debug('[confirm] Confirmation response:', data)
 
       if (response.ok) {
         setConfirmed(true)
@@ -41,7 +42,7 @@ export default function ConfirmAgreementPage() {
         setError(data.error || 'Une erreur est survenue')
       }
     } catch (err) {
-      console.error('[confirm] Confirmation error:', err)
+      logger.error('[confirm] Confirmation error:', err)
       setError('Une erreur est survenue lors de la confirmation')
     } finally {
       setLoading(false)

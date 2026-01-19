@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 // GET /api/feedback/[id] - Récupérer un feedback spécifique
 export async function GET(
@@ -81,7 +82,7 @@ export async function GET(
 
     return NextResponse.json(feedback)
   } catch (error) {
-    console.error('Error fetching feedback:', error)
+    logger.error('Error fetching feedback:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération du feedback' },
       { status: 500 }
@@ -147,7 +148,7 @@ export async function PATCH(
 
     return NextResponse.json(feedback)
   } catch (error) {
-    console.error('Error updating feedback:', error)
+    logger.error('Error updating feedback:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour du feedback' },
       { status: 500 }
@@ -183,7 +184,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting feedback:', error)
+    logger.error('Error deleting feedback:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du feedback' },
       { status: 500 }

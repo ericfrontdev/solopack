@@ -14,6 +14,7 @@ import { ProjectModal } from '@/components/crm/project-modal'
 import { CreateInvoiceForProjectModal } from '@/components/crm/create-invoice-for-project-modal'
 import { UploadDocumentsModal } from '@/components/crm/upload-documents-modal'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 type Project = {
   id: string
@@ -69,7 +70,7 @@ export function ProjectActions({ project, clientId }: { project: Project; client
       setIsEditModalOpen(false)
       router.refresh()
     } catch (error) {
-      console.error('Error updating project:', error)
+      logger.error('Error updating project:', error)
       throw error
     }
   }
@@ -91,7 +92,7 @@ export function ProjectActions({ project, clientId }: { project: Project; client
       setIsInvoiceModalOpen(false)
       router.refresh()
     } catch (error) {
-      console.error('Error creating invoice:', error)
+      logger.error('Error creating invoice:', error)
       throw error
     }
   }

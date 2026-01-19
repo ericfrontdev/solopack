@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: Request) {
   try {
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
     const brevoListId = process.env.BREVO_WAITLIST_ID || '3'
 
     if (!brevoApiKey) {
-      console.error('BREVO_API_KEY not configured')
+      logger.error('BREVO_API_KEY not configured')
       return NextResponse.json(
         { error: 'waitlist.errorAdding' },
         { status: 500 }
@@ -72,8 +73,8 @@ export async function POST(req: Request) {
 
     // Si le contact existe déjà dans Brevo
     if (!brevoResponse.ok) {
-      console.error('Brevo API error - Status:', brevoResponse.status)
-      console.error('Brevo API error - Response:', JSON.stringify(brevoData, null, 2))
+      logger.error('Brevo API error - Status:', brevoResponse.status)
+      logger.error('Brevo API error - Response:', JSON.stringify(brevoData, null, 2))
 
       if (brevoData.code === 'duplicate_parameter') {
         return NextResponse.json(
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Error adding to waitlist:', error)
+    logger.error('Error adding to waitlist:', error)
     return NextResponse.json(
       { error: 'waitlist.errorAdding' },
       { status: 500 }

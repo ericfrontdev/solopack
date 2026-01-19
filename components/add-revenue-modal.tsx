@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 export function AddRevenueModal({
   isOpen,
@@ -49,7 +50,7 @@ export function AddRevenueModal({
       setCategory('')
       onClose()
     } catch (error) {
-      console.error('Error saving revenue:', error)
+      logger.error('Error saving revenue:', error)
     } finally {
       setIsSubmitting(false)
     }

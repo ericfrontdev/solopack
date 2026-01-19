@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
@@ -25,7 +26,7 @@ export async function GET() {
       maxUsers: settings.maxBetaUsers,
     })
   } catch (error) {
-    console.error('Error checking beta status:', error)
+    logger.error('Error checking beta status:', error)
     // En cas d'erreur, autoriser l'inscription par défaut
     return NextResponse.json({
       betaEnabled: false,

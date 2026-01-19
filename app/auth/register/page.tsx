@@ -8,6 +8,7 @@ import { signIn } from 'next-auth/react'
 import { ThemeLogo } from '@/components/theme-logo'
 import { useTranslation } from '@/lib/i18n-context'
 import { AlertCircle } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 export default function RegisterPage() {
   const { t } = useTranslation()
@@ -34,7 +35,7 @@ export default function RegisterPage() {
           router.push('/waitlist')
         }
       } catch (error) {
-        console.error('Error checking beta status:', error)
+        logger.error('Error checking beta status:', error)
         // En cas d'erreur, autoriser l'inscription
         setRegistrationOpen(true)
       } finally {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 // GET /api/notifications - Get user's notifications
 export async function GET(request: Request) {
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(notifications)
   } catch (error) {
-    console.error('Error fetching notifications:', error)
+    logger.error('Error fetching notifications:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des notifications' },
       { status: 500 }
@@ -53,7 +54,7 @@ export async function PATCH() {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error marking notifications as read:', error)
+    logger.error('Error marking notifications as read:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour des notifications' },
       { status: 500 }

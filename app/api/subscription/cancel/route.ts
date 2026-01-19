@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function POST() {
   try {
@@ -172,7 +173,7 @@ export async function POST() {
       helcimCanceled,
     })
   } catch (error) {
-    console.error('Erreur lors de l\'annulation de l\'abonnement:', error)
+    logger.error('Erreur lors de l\'annulation de l\'abonnement:', error)
 
     // Logger l'erreur en BD
     try {
@@ -190,7 +191,7 @@ export async function POST() {
         },
       })
     } catch (logError) {
-      console.error('Erreur lors du logging:', logError)
+      logger.error('Erreur lors du logging:', logError)
     }
 
     return NextResponse.json(

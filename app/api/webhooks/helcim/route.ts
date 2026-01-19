@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 import { Resend } from 'resend'
+import { logger } from '@/lib/logger'
 
 const INVOICE_FROM_EMAIL = process.env.INVOICE_FROM_EMAIL || process.env.EMAIL_FROM || 'invoices@solopack.app'
 
@@ -39,18 +40,18 @@ export async function POST(req: NextRequest) {
         .digest('hex')
 
       if (signature !== expectedSignature) {
-        console.error('[helcim-webhook] Invalid signature')
+        logger.error('[helcim-webhook] Invalid signature')
         return NextResponse.json(
           { error: 'Invalid signature' },
           { status: 401 }
         )
       }
     } else {
-      console.warn('[helcim-webhook] No webhook secret configured - accepting unverified webhook')
+      logger.warn('[helcim-webhook] No webhook secret configured - accepting unverified webhook')
     }
 
     const payload: HelcimWebhookPayload = JSON.parse(body)
-    console.log('[helcim-webhook] Event received:', payload.type)
+    logger.debug('[helcim-webhook] Event received:', payload.type)
 
     // Gérer l'événement de paiement réussi
     if (payload.type === 'payment.success' || payload.type === 'transaction.success') {
@@ -58,14 +59,14 @@ export async function POST(req: NextRequest) {
       const invoiceId = payload.customField1
 
       if (!invoiceId) {
-        console.error('[helcim-webhook] No invoice ID in payload')
+        logger.error('[helcim-webhook] No invoice ID in payload')
         return NextResponse.json(
           { error: 'No invoice ID in payload' },
           { status: 400 }
         )
       }
 
-      console.log('[helcim-webhook] Processing payment for invoice:', invoiceId)
+      logger.debug('[helcim-webhook] Processing payment for invoice:', invoiceId)
 
       // Récupérer la facture avec les informations complètes
       const invoice = await prisma.invoice.findUnique({
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
       })
 
       if (!invoice) {
-        console.error('[helcim-webhook] Invoice not found:', invoiceId)
+        logger.error('[helcim-webhook] Invoice not found:', invoiceId)
         return NextResponse.json(
           { error: 'Invoice not found' },
           { status: 404 }
@@ -95,7 +96,7 @@ export async function POST(req: NextRequest) {
 
       // Vérifier que la facture n'est pas déjà payée
       if (invoice.status === 'paid') {
-        console.log('[helcim-webhook] Invoice already paid:', invoiceId)
+        logger.debug('[helcim-webhook] Invoice already paid:', invoiceId)
         return NextResponse.json({ received: true, message: 'Already paid' })
       }
 
@@ -116,14 +117,14 @@ export async function POST(req: NextRequest) {
         data: { status: 'paid' },
       })
 
-      console.log('[helcim-webhook] Invoice updated successfully:', invoiceId)
+      logger.debug('[helcim-webhook] Invoice updated successfully:', invoiceId)
 
       // Envoyer un email de confirmation au client
       try {
         if (!process.env.RESEND_API_KEY || !INVOICE_FROM_EMAIL) {
-          console.error('[helcim-webhook] Email configuration missing')
+          logger.error('[helcim-webhook] Email configuration missing')
         } else if (!invoice.client.email) {
-          console.error('[helcim-webhook] Client email not found')
+          logger.error('[helcim-webhook] Client email not found')
         } else {
           const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -209,17 +210,17 @@ export async function POST(req: NextRequest) {
             `,
           })
 
-          console.log('[helcim-webhook] Confirmation email sent to:', invoice.client.email)
+          logger.debug('[helcim-webhook] Confirmation email sent to:', invoice.client.email)
         }
       } catch (emailError) {
-        console.error('[helcim-webhook] Error sending email:', emailError)
+        logger.error('[helcim-webhook] Error sending email:', emailError)
         // Ne pas faire échouer le webhook si l'email échoue
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[helcim-webhook] Error:', error)
+    logger.error('[helcim-webhook] Error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
       { error: 'Internal server error', details: errorMessage },
