@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import { decrypt } from '@/lib/crypto'
 
 export async function POST(req: NextRequest) {
   try {
@@ -52,8 +53,20 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Decrypt the Stripe secret key
+    let stripeSecretKey: string
+    try {
+      stripeSecretKey = decrypt(invoice.client.user.stripeSecretKey)
+    } catch (error) {
+      console.error('[create-stripe-session] Error decrypting Stripe key:', error)
+      return NextResponse.json(
+        { error: 'Erreur lors du déchiffrement de la clé Stripe. Veuillez reconfigurer votre clé dans les paramètres.' },
+        { status: 500 }
+      )
+    }
+
     // Initialiser Stripe avec la clé de l'utilisateur
-    const stripe = new Stripe(invoice.client.user.stripeSecretKey, {
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: '2025-10-29.clover',
     })
 

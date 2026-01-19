@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { encrypt, isEncrypted, maskSensitiveValue } from '@/lib/crypto'
 
 export async function PUT(req: NextRequest) {
   try {
@@ -36,6 +37,26 @@ export async function PUT(req: NextRequest) {
       )
     }
 
+    // Encrypt Stripe secret key if provided and not already encrypted
+    let encryptedStripeKey: string | null = null
+    if (stripeSecretKey) {
+      if (isEncrypted(stripeSecretKey)) {
+        // Already encrypted, keep as is
+        encryptedStripeKey = stripeSecretKey
+      } else {
+        // Encrypt the new key
+        try {
+          encryptedStripeKey = encrypt(stripeSecretKey.trim())
+        } catch (error) {
+          console.error('Error encrypting Stripe key:', error)
+          return NextResponse.json(
+            { error: 'Erreur lors du chiffrement de la clé Stripe' },
+            { status: 500 }
+          )
+        }
+      }
+    }
+
     // Update user profile
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
@@ -51,7 +72,7 @@ export async function PUT(req: NextRequest) {
         chargesTaxes: chargesTaxes ?? false,
         paymentProvider: paymentProvider || null,
         paypalEmail: paypalEmail || null,
-        stripeSecretKey: stripeSecretKey || null,
+        stripeSecretKey: encryptedStripeKey,
         autoRemindersEnabled: autoRemindersEnabled ?? false,
         reminderMiseEnDemeureTemplate: reminderMiseEnDemeureTemplate || null,
       },
@@ -72,7 +93,9 @@ export async function PUT(req: NextRequest) {
         chargesTaxes: updatedUser.chargesTaxes,
         paymentProvider: updatedUser.paymentProvider,
         paypalEmail: updatedUser.paypalEmail,
-        stripeSecretKey: updatedUser.stripeSecretKey,
+        // NEVER return the actual Stripe key - only indicate if one is set
+        stripeSecretKey: maskSensitiveValue(updatedUser.stripeSecretKey),
+        hasStripeKey: !!updatedUser.stripeSecretKey,
         autoRemindersEnabled: updatedUser.autoRemindersEnabled,
         reminderMiseEnDemeureTemplate: updatedUser.reminderMiseEnDemeureTemplate,
       },
