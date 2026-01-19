@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { notFound, redirect } from 'next/navigation'
 import { PaymentSuccessPageClient } from '@/components/pages/payment-success-page-client'
 import Stripe from 'stripe'
+import { decrypt } from '@/lib/crypto'
 
 async function getInvoice(id: string) {
   const invoice = await prisma.invoice.findUnique({
@@ -82,9 +83,16 @@ export default async function PaymentSuccessPage(props: {
 
   // Si on a un session_id et que la facture n'est pas encore payée, vérifier le paiement
   if (searchParams.session_id && invoice.status !== 'paid' && invoice.client.user.stripeSecretKey) {
-    await verifyAndUpdatePayment(params.id, searchParams.session_id, invoice.client.user.stripeSecretKey)
-    // Rediriger pour rafraîchir les données
-    redirect(`/invoices/${params.id}/pay/success`)
+    try {
+      // Decrypt the Stripe key before using it
+      const decryptedKey = decrypt(invoice.client.user.stripeSecretKey)
+      await verifyAndUpdatePayment(params.id, searchParams.session_id, decryptedKey)
+      // Rediriger pour rafraîchir les données
+      redirect(`/invoices/${params.id}/pay/success`)
+    } catch (error) {
+      console.error('[payment-success] Error decrypting Stripe key:', error)
+      // Continue without verification if decryption fails
+    }
   }
 
   return <PaymentSuccessPageClient invoice={invoice} />
