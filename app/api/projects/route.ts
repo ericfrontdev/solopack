@@ -4,21 +4,23 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { resend } from '@/lib/resend'
 import PaymentAgreementEmail from '@/emails/payment-agreement-email'
+import { ZodError } from 'zod'
+import { validateSearchParams, validationError, projectsQuerySchema } from '@/lib/validations'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const PAYMENT_AGREEMENT_FROM_EMAIL = process.env.PAYMENT_AGREEMENT_FROM_EMAIL || process.env.EMAIL_FROM || 'agreements@solopack.app'
 
 export async function GET(request: Request) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-  }
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
 
-  const { searchParams } = new URL(request.url)
-  const clientId = searchParams.get('clientId')
+    const { clientId } = validateSearchParams(request, projectsQuerySchema)
 
-  // Cas 1: Si clientId est fourni, retourner les projets de ce client
-  if (clientId) {
+    // Cas 1: Si clientId est fourni, retourner les projets de ce client
+    if (clientId) {
     // Vérifier que le client appartient à l'utilisateur
     const client = await prisma.client.findUnique({
       where: { id: clientId, userId: session.user.id },
@@ -90,6 +92,12 @@ export async function GET(request: Request) {
   })
 
   return NextResponse.json(projects)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return validationError(error)
+    }
+    return NextResponse.json({ error: 'Erreur lors de la récupération des projets' }, { status: 500 })
+  }
 }
 
 async function generateUniqueInvoiceNumber(): Promise<string> {

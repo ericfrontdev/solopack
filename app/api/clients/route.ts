@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { ZodError } from 'zod'
+import { validateBody, validationError, createClientSchema } from '@/lib/validations'
 
 export async function GET() {
   try {
@@ -41,42 +43,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    const body = await req.json()
-    let { name, company, email, phone, address, website } = body ?? {}
-
-    name = typeof name === 'string' ? name.trim() : ''
-    email = typeof email === 'string' ? email.trim() : ''
-    company = typeof company === 'string' ? company.trim() : null
-    phone = typeof phone === 'string' ? phone.trim() : null
-    address = typeof address === 'string' ? address.trim() : null
-    website = typeof website === 'string' ? website.trim() : null
-
-    if (!name || !email) {
-      return NextResponse.json(
-        { error: 'Les champs name et email sont requis.' },
-        { status: 400 },
-      )
-    }
-
-    const emailOk = /.+@.+\..+/.test(email)
-    if (!emailOk) {
-      return NextResponse.json({ error: 'Email invalide.' }, { status: 400 })
-    }
+    // Validate request body with Zod
+    const data = await validateBody(req, createClientSchema)
 
     const client = await prisma.client.create({
       data: {
-        name,
-        company: company || null,
-        email,
-        phone: phone || null,
-        address: address || null,
-        website: website || null,
+        ...data,
         userId: session.user.id,
       },
     })
 
     return NextResponse.json(client, { status: 201 })
-  } catch {
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return validationError(error)
+    }
     return NextResponse.json(
       { error: 'Erreur lors de la création du client.' },
       { status: 500 },

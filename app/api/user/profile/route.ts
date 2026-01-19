@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { encrypt, isEncrypted, maskSensitiveValue } from '@/lib/crypto'
+import { ZodError } from 'zod'
+import { validateBody, validationError, updateProfileSchema } from '@/lib/validations'
 
 export async function PUT(req: NextRequest) {
   try {
@@ -11,42 +13,19 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const body = await req.json()
-    const {
-      name,
-      email,
-      company,
-      phone,
-      address,
-      neq,
-      tpsNumber,
-      tvqNumber,
-      chargesTaxes,
-      paymentProvider,
-      paypalEmail,
-      stripeSecretKey,
-      autoRemindersEnabled,
-      reminderMiseEnDemeureTemplate
-    } = body
-
-    // Validate required fields
-    if (!name || !email) {
-      return NextResponse.json(
-        { error: 'Le nom et l\'email sont requis' },
-        { status: 400 }
-      )
-    }
+    // Validate request body with Zod
+    const data = await validateBody(req, updateProfileSchema)
 
     // Encrypt Stripe secret key if provided and not already encrypted
-    let encryptedStripeKey: string | null = null
-    if (stripeSecretKey) {
-      if (isEncrypted(stripeSecretKey)) {
+    let encryptedStripeKey: string | undefined = undefined
+    if (data.stripeSecretKey) {
+      if (isEncrypted(data.stripeSecretKey)) {
         // Already encrypted, keep as is
-        encryptedStripeKey = stripeSecretKey
+        encryptedStripeKey = data.stripeSecretKey
       } else {
         // Encrypt the new key
         try {
-          encryptedStripeKey = encrypt(stripeSecretKey.trim())
+          encryptedStripeKey = encrypt(data.stripeSecretKey.trim())
         } catch (error) {
           console.error('Error encrypting Stripe key:', error)
           return NextResponse.json(
@@ -61,20 +40,9 @@ export async function PUT(req: NextRequest) {
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        name,
-        email,
-        company: company || null,
-        phone: phone || null,
-        address: address || null,
-        neq: neq || null,
-        tpsNumber: tpsNumber || null,
-        tvqNumber: tvqNumber || null,
-        chargesTaxes: chargesTaxes ?? false,
-        paymentProvider: paymentProvider || null,
-        paypalEmail: paypalEmail || null,
-        stripeSecretKey: encryptedStripeKey,
-        autoRemindersEnabled: autoRemindersEnabled ?? false,
-        reminderMiseEnDemeureTemplate: reminderMiseEnDemeureTemplate || null,
+        ...data,
+        // Override stripeSecretKey with encrypted version if provided
+        ...(encryptedStripeKey !== undefined && { stripeSecretKey: encryptedStripeKey }),
       },
     })
 
@@ -101,6 +69,9 @@ export async function PUT(req: NextRequest) {
       },
     })
   } catch (error) {
+    if (error instanceof ZodError) {
+      return validationError(error)
+    }
     console.error('Error updating profile:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour du profil' },

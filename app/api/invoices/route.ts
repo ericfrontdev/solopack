@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { ZodError } from 'zod'
+import { validateBody, validationError, createInvoiceSchema } from '@/lib/validations'
 
 function makeInvoiceNumber() {
   const d = new Date()
@@ -17,34 +19,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 })
     }
 
-    const body = await req.json()
-    console.log('[invoices:POST] Request body:', body)
-    const clientId: string | undefined = body?.clientId
-    const unpaidAmountIds: string[] | undefined = body?.unpaidAmountIds
-    const items: Array<{ description: string; amount: number }> | undefined = body?.items
-    const projectId: string | undefined = body?.projectId
-    const dueDate: string | undefined = body?.dueDate
-
-    // Support deux modes: unpaidAmountIds (ancien) ou items directement (nouveau)
-    if (!clientId) {
-      console.log('[invoices:POST] Validation failed: missing clientId')
-      return NextResponse.json({ error: 'clientId requis.' }, { status: 400 })
-    }
-
-    if (!unpaidAmountIds && !items) {
-      console.log('[invoices:POST] Validation failed: missing unpaidAmountIds or items')
-      return NextResponse.json({ error: 'unpaidAmountIds ou items requis.' }, { status: 400 })
-    }
-
-    if (unpaidAmountIds && (!Array.isArray(unpaidAmountIds) || unpaidAmountIds.length === 0)) {
-      console.log('[invoices:POST] Validation failed:', { clientId, unpaidAmountIds })
-      return NextResponse.json({ error: 'unpaidAmountIds doit être un tableau non-vide.' }, { status: 400 })
-    }
-
-    if (items && (!Array.isArray(items) || items.length === 0)) {
-      console.log('[invoices:POST] Validation failed: items must be non-empty array')
-      return NextResponse.json({ error: 'items doit être un tableau non-vide.' }, { status: 400 })
-    }
+    // Validate request body with Zod
+    const { clientId, unpaidAmountIds, items, projectId, dueDate } = await validateBody(req, createInvoiceSchema)
 
     const result = await prisma.$transaction(async (tx) => {
       // Vérifier client et ownership
@@ -157,6 +133,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result, { status: 201 })
   } catch (err) {
+    if (err instanceof ZodError) {
+      return validationError(err)
+    }
     if (err instanceof Error) {
       if (err.message === 'CLIENT_NOT_FOUND') {
         return NextResponse.json({ error: 'Client introuvable.' }, { status: 404 })
