@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { ZodError } from 'zod'
+import { validateBody, validateParams, validationError, updateClientSchema, clientIdSchema } from '@/lib/validations'
 
 export async function PATCH(
   req: Request,
@@ -13,20 +15,10 @@ export async function PATCH(
     }
 
     const params = await props.params
-    const id = params.id
-    if (!id) {
-      return NextResponse.json({ error: 'ID requis' }, { status: 400 })
-    }
+    const { id } = validateParams(params, clientIdSchema)
 
-    const body = await req.json()
-    const { name, company, email, phone, address, website } = body
-
-    if (!name || !email) {
-      return NextResponse.json(
-        { error: 'Nom et email requis' },
-        { status: 400 }
-      )
-    }
+    // Validate request body
+    const data = await validateBody(req, updateClientSchema)
 
     // Verify ownership
     const existingClient = await prisma.client.findUnique({
@@ -43,19 +35,15 @@ export async function PATCH(
 
     const client = await prisma.client.update({
       where: { id },
-      data: {
-        name,
-        company: company || null,
-        email,
-        phone: phone || null,
-        address: address || null,
-        website: website || null,
-      },
+      data,
     })
 
     return NextResponse.json(client, { status: 200 })
-  } catch (e) {
-    console.error('[clients:PATCH] Error:', e)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return validationError(error)
+    }
+    console.error('[clients:PATCH] Error:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la modification du client' },
       { status: 500 }
@@ -74,10 +62,7 @@ export async function DELETE(
     }
 
     const params = await props.params
-    const id = params.id
-    if (!id) {
-      return NextResponse.json({ error: 'ID requis' }, { status: 400 })
-    }
+    const { id } = validateParams(params, clientIdSchema)
 
     const { searchParams } = new URL(req.url)
     const permanent = searchParams.get('permanent') === 'true'
@@ -112,8 +97,11 @@ export async function DELETE(
       })
       return NextResponse.json({ success: true, message: 'Client archivé' }, { status: 200 })
     }
-  } catch (e) {
-    console.error('[clients:DELETE] Error:', e)
+  } catch (error) {
+    if (error instanceof ZodError) {
+      return validationError(error)
+    }
+    console.error('[clients:DELETE] Error:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la suppression du client' },
       { status: 500 }
