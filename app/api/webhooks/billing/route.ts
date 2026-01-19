@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
+import { logger } from '@/lib/logger'
 
 interface HelcimWebhookData {
   type?: string
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
         .digest('hex')
 
       if (signature !== expectedSignature) {
-        console.error('Signature webhook invalide')
+        logger.error('Signature webhook invalide')
         statusCode = 401
         errorMessage = 'Signature invalide'
 
@@ -73,12 +74,12 @@ export async function POST(request: Request) {
       }
 
       parsedBody = JSON.parse(body)
-      console.log('Webhook Helcim reçu (vérifié):', parsedBody)
+      logger.debug('Webhook Helcim reçu (vérifié):', parsedBody)
     } else {
       // Si pas de secret configuré, traiter quand même (pour dev)
       parsedBody = await request.json()
       body = JSON.stringify(parsedBody)
-      console.log('Webhook Helcim reçu (non vérifié):', parsedBody)
+      logger.debug('Webhook Helcim reçu (non vérifié):', parsedBody)
     }
 
     // Logger en BD AVANT le traitement
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
     // Traiter le webhook
     return await processWebhook(parsedBody)
   } catch (error) {
-    console.error('Erreur webhook Helcim:', error)
+    logger.error('Erreur webhook Helcim:', error)
     statusCode = 500
     errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
@@ -115,7 +116,7 @@ export async function POST(request: Request) {
         },
       })
     } catch (logError) {
-      console.error('Erreur lors du logging:', logError)
+      logger.error('Erreur lors du logging:', logError)
     }
 
     return NextResponse.json(
@@ -152,12 +153,12 @@ async function processWebhook(body: HelcimWebhookData) {
         break
 
       default:
-        console.log('Type d\'événement non géré:', eventType)
+        logger.debug('Type d\'événement non géré:', eventType)
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Erreur processWebhook:', error)
+    logger.error('Erreur processWebhook:', error)
     return NextResponse.json(
       { error: 'Erreur lors du traitement du webhook' },
       { status: 500 }
@@ -317,24 +318,24 @@ async function logDebugInfo(transactionId: string, debugInfo: string) {
       })
     }
   } catch (error) {
-    console.error('[logDebugInfo] Erreur:', error)
+    logger.error('[logDebugInfo] Erreur:', error)
   }
 }
 
 async function handlePaymentSuccess(data: HelcimWebhookData) {
-  console.log('[handlePaymentSuccess] Full payload:', JSON.stringify(data, null, 2))
+  logger.debug('[handlePaymentSuccess] Full payload:', JSON.stringify(data, null, 2))
 
   const customerCode = data.customer?.customerCode || data.customerCode
 
   if (!customerCode) {
-    console.error('[handlePaymentSuccess] ERREUR: Pas de customerCode dans le webhook')
-    console.error('[handlePaymentSuccess] data.customer:', data.customer)
-    console.error('[handlePaymentSuccess] data.customerCode:', data.customerCode)
-    console.error('[handlePaymentSuccess] Full data keys:', Object.keys(data))
+    logger.error('[handlePaymentSuccess] ERREUR: Pas de customerCode dans le webhook')
+    logger.error('[handlePaymentSuccess] data.customer:', data.customer)
+    logger.error('[handlePaymentSuccess] data.customerCode:', data.customerCode)
+    logger.error('[handlePaymentSuccess] Full data keys:', Object.keys(data))
     return
   }
 
-  console.log(`[handlePaymentSuccess] customerCode trouvé: ${customerCode}`)
+  logger.debug(`[handlePaymentSuccess] customerCode trouvé: ${customerCode}`)
 
   // Mettre à jour l'utilisateur
   try {
@@ -348,9 +349,9 @@ async function handlePaymentSuccess(data: HelcimWebhookData) {
       },
     })
 
-    console.log(`[handlePaymentSuccess] ✅ Abonnement activé pour l'utilisateur ${customerCode}`)
+    logger.debug(`[handlePaymentSuccess] ✅ Abonnement activé pour l'utilisateur ${customerCode}`)
   } catch (error) {
-    console.error(`[handlePaymentSuccess] ❌ Erreur lors de la mise à jour de l'utilisateur:`, error)
+    logger.error(`[handlePaymentSuccess] ❌ Erreur lors de la mise à jour de l'utilisateur:`, error)
     throw error
   }
 }
@@ -359,7 +360,7 @@ async function handlePaymentFailed(data: HelcimWebhookData) {
   const customerCode = data.customer?.customerCode || data.customerCode
 
   if (!customerCode) {
-    console.error('Pas de customerCode dans le webhook')
+    logger.error('Pas de customerCode dans le webhook')
     return
   }
 
@@ -371,7 +372,7 @@ async function handlePaymentFailed(data: HelcimWebhookData) {
     },
   })
 
-  console.log(`Paiement échoué pour l'utilisateur ${customerCode}`)
+  logger.debug(`Paiement échoué pour l'utilisateur ${customerCode}`)
 
   // TODO: Envoyer un email à l'utilisateur pour l'informer
 }
@@ -380,7 +381,7 @@ async function handleSubscriptionCancelled(data: HelcimWebhookData) {
   const customerCode = data.customer?.customerCode || data.customerCode
 
   if (!customerCode) {
-    console.error('Pas de customerCode dans le webhook')
+    logger.error('Pas de customerCode dans le webhook')
     return
   }
 
@@ -397,7 +398,7 @@ async function handleSubscriptionCancelled(data: HelcimWebhookData) {
     },
   })
 
-  console.log(`Abonnement annulé pour l'utilisateur ${customerCode}`)
+  logger.debug(`Abonnement annulé pour l'utilisateur ${customerCode}`)
 
   // TODO: Envoyer un email de confirmation d'annulation
 }

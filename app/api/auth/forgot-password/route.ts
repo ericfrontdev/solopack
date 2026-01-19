@@ -5,6 +5,7 @@ import { render } from '@react-email/components'
 import PasswordResetEmail from '@/emails/password-reset-email'
 import crypto from 'crypto'
 import { rateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev'
@@ -107,7 +108,7 @@ export async function POST(req: Request) {
       { headers: rateLimitHeaders }
     )
   } catch (error) {
-    console.error('Error in forgot-password:', error)
+    logger.error('Error in forgot-password:', error)
     return NextResponse.json(
       { error: 'Une erreur est survenue' },
       { status: 500 }

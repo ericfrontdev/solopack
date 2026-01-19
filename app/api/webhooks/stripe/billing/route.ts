@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import { logger } from '@/lib/logger'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-10-29.clover',
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     } catch (err) {
-      console.error('Webhook signature verification failed:', err)
+      logger.error('Webhook signature verification failed:', err)
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
 
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
             },
           })
 
-          console.log(`✅ Abonnement créé pour l'utilisateur ${userId}`)
+          logger.debug(`✅ Abonnement créé pour l'utilisateur ${userId}`)
         }
         break
       }
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest) {
             },
           })
 
-          console.log(`✅ Abonnement mis à jour pour l'utilisateur ${userId}`)
+          logger.debug(`✅ Abonnement mis à jour pour l'utilisateur ${userId}`)
         }
         break
       }
@@ -84,7 +85,7 @@ export async function POST(req: NextRequest) {
             },
           })
 
-          console.log(`❌ Abonnement annulé pour l'utilisateur ${userId}`)
+          logger.debug(`❌ Abonnement annulé pour l'utilisateur ${userId}`)
         }
         break
       }
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
               },
             })
 
-            console.log(`✅ Paiement réussi pour l'utilisateur ${userId}`)
+            logger.debug(`✅ Paiement réussi pour l'utilisateur ${userId}`)
           }
         }
         break
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
               },
             })
 
-            console.log(`⚠️ Paiement échoué pour l'utilisateur ${userId}`)
+            logger.debug(`⚠️ Paiement échoué pour l'utilisateur ${userId}`)
 
             // TODO: Envoyer un email à l'utilisateur pour l'informer
           }
@@ -141,12 +142,12 @@ export async function POST(req: NextRequest) {
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`)
+        logger.debug(`Unhandled event type: ${event.type}`)
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Webhook error:', error)
+    logger.error('Webhook error:', error)
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }

@@ -26,6 +26,7 @@ import {
 import { useImageUpload } from '@/lib/upload-image'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 export function FeedbackWidget() {
   const { t } = useTranslation()
@@ -154,7 +155,7 @@ export function FeedbackWidget() {
       // Refresh router cache
       router.refresh()
     } catch (error) {
-      console.error('Error submitting feedback:', error)
+      logger.error('Error submitting feedback:', error)
       alert(t('feedback.feedbackError'))
     } finally {
       setSubmitting(false)

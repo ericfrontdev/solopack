@@ -2,6 +2,7 @@
 
 import { SWRConfig } from 'swr'
 import { ReactNode } from 'react'
+import { logger } from '@/lib/logger'
 
 const fetcher = async (url: string) => {
   const res = await fetch(url)
@@ -30,7 +31,7 @@ export function SWRProvider({ children }: { children: ReactNode }) {
         onError: (error, key) => {
           // Log errors for debugging
           if (error.status !== 404) {
-            console.error('[SWR Error]', key, error)
+            logger.error('[SWR Error]', key, error)
           }
         },
       }}

@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { encrypt, isEncrypted, maskSensitiveValue } from '@/lib/crypto'
 import { ZodError } from 'zod'
 import { validateBody, validationError, updateProfileSchema } from '@/lib/validations'
+import { logger } from '@/lib/logger'
 
 export async function PUT(req: NextRequest) {
   try {
@@ -27,7 +28,7 @@ export async function PUT(req: NextRequest) {
         try {
           encryptedStripeKey = encrypt(data.stripeSecretKey.trim())
         } catch (error) {
-          console.error('Error encrypting Stripe key:', error)
+          logger.error('Error encrypting Stripe key:', error)
           return NextResponse.json(
             { error: 'Erreur lors du chiffrement de la clé Stripe' },
             { status: 500 }
@@ -72,7 +73,7 @@ export async function PUT(req: NextRequest) {
     if (error instanceof ZodError) {
       return validationError(error)
     }
-    console.error('Error updating profile:', error)
+    logger.error('Error updating profile:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour du profil' },
       { status: 500 }

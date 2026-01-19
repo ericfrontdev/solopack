@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   req: Request,
@@ -42,7 +43,7 @@ export async function POST(
 
     return NextResponse.json({ success: true, message: 'Client restauré' }, { status: 200 })
   } catch (e) {
-    console.error('[clients:restore] Error:', e)
+    logger.error('[clients:restore] Error:', e)
     return NextResponse.json(
       { error: 'Erreur lors de la restauration du client' },
       { status: 500 }

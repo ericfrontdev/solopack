@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { Resend } from 'resend'
 import { getReminderEmailHtml, getReminderSubject } from '@/lib/reminder-email-templates'
+import { logger } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -127,7 +128,7 @@ export async function POST(req: Request) {
         reminder,
       })
     } catch (error) {
-      console.error(`[reminders:send-manual] Error sending reminder:`, error)
+      logger.error(`[reminders:send-manual] Error sending reminder:`, error)
 
       // Enregistrer l'erreur
       await prisma.invoiceReminder.create({
@@ -143,7 +144,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Erreur lors de l\'envoi du rappel.' }, { status: 500 })
     }
   } catch (error) {
-    console.error('[reminders:send-manual] Error:', error)
+    logger.error('[reminders:send-manual] Error:', error)
     return NextResponse.json({ error: 'Erreur lors de l\'envoi du rappel.' }, { status: 500 })
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
+import { logger } from '@/lib/logger'
 
 const INVOICE_FROM_EMAIL = process.env.INVOICE_FROM_EMAIL || process.env.EMAIL_FROM || 'invoices@solopack.app'
 
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     // Vérifier que les clés Stripe sont configurées
     if (!process.env.STRIPE_SECRET_KEY) {
-      console.error('[stripe-webhook] STRIPE_SECRET_KEY not configured')
+      logger.error('[stripe-webhook] STRIPE_SECRET_KEY not configured')
       return NextResponse.json(
         { error: 'Stripe not configured' },
         { status: 500 }
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!process.env.STRIPE_WEBHOOK_SECRET) {
-      console.error('[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured')
+      logger.error('[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured')
       return NextResponse.json(
         { error: 'Stripe webhook secret not configured' },
         { status: 500 }
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
     const sig = req.headers.get('stripe-signature')
 
     if (!sig) {
-      console.error('[stripe-webhook] No signature header')
+      logger.error('[stripe-webhook] No signature header')
       return NextResponse.json({ error: 'No signature' }, { status: 400 })
     }
 
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
         process.env.STRIPE_WEBHOOK_SECRET
       )
     } catch (err) {
-      console.error('[stripe-webhook] Webhook signature verification failed:', err)
+      logger.error('[stripe-webhook] Webhook signature verification failed:', err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       return NextResponse.json(
         { error: 'Invalid signature', details: errorMessage },
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('[stripe-webhook] Event received:', event.type)
+    logger.debug('[stripe-webhook] Event received:', event.type)
 
     // Gérer l'événement checkout.session.completed
     if (event.type === 'checkout.session.completed') {
@@ -67,11 +68,11 @@ export async function POST(req: NextRequest) {
       const invoiceId = session.metadata?.invoiceId
 
       if (!invoiceId) {
-        console.error('[stripe-webhook] No invoice ID in session metadata')
+        logger.error('[stripe-webhook] No invoice ID in session metadata')
         return NextResponse.json({ error: 'No invoice ID' }, { status: 400 })
       }
 
-      console.log('[stripe-webhook] Processing payment for invoice:', invoiceId)
+      logger.debug('[stripe-webhook] Processing payment for invoice:', invoiceId)
 
       // Récupérer la facture avec les informations complètes
       const invoice = await prisma.invoice.findUnique({
@@ -92,13 +93,13 @@ export async function POST(req: NextRequest) {
       })
 
       if (!invoice) {
-        console.error('[stripe-webhook] Invoice not found:', invoiceId)
+        logger.error('[stripe-webhook] Invoice not found:', invoiceId)
         return NextResponse.json({ error: 'Invoice not found' }, { status: 404 })
       }
 
       // Vérifier que la facture n'est pas déjà payée
       if (invoice.status === 'paid') {
-        console.log('[stripe-webhook] Invoice already paid:', invoiceId)
+        logger.debug('[stripe-webhook] Invoice already paid:', invoiceId)
         return NextResponse.json({ received: true, message: 'Already paid' })
       }
 
@@ -119,14 +120,14 @@ export async function POST(req: NextRequest) {
         data: { status: 'paid' },
       })
 
-      console.log('[stripe-webhook] Invoice updated successfully:', invoiceId)
+      logger.debug('[stripe-webhook] Invoice updated successfully:', invoiceId)
 
       // Envoyer un email de confirmation au client
       try {
         if (!process.env.RESEND_API_KEY || !INVOICE_FROM_EMAIL) {
-          console.error('[stripe-webhook] Email configuration missing')
+          logger.error('[stripe-webhook] Email configuration missing')
         } else if (!invoice.client.email) {
-          console.error('[stripe-webhook] Client email not found')
+          logger.error('[stripe-webhook] Client email not found')
         } else {
           const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -212,17 +213,17 @@ export async function POST(req: NextRequest) {
             `,
           })
 
-          console.log('[stripe-webhook] Confirmation email sent to:', invoice.client.email)
+          logger.debug('[stripe-webhook] Confirmation email sent to:', invoice.client.email)
         }
       } catch (emailError) {
-        console.error('[stripe-webhook] Error sending email:', emailError)
+        logger.error('[stripe-webhook] Error sending email:', emailError)
         // Ne pas faire échouer le webhook si l'email échoue
       }
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[stripe-webhook] Error:', error)
+    logger.error('[stripe-webhook] Error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
       { error: 'Internal server error', details: errorMessage },

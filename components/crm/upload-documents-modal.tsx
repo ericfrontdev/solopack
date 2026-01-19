@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Upload, X, FileIcon } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 export function UploadDocumentsModal({
   isOpen,
@@ -81,7 +82,7 @@ export function UploadDocumentsModal({
       router.refresh()
       onClose()
     } catch (error) {
-      console.error('Upload error:', error)
+      logger.error('Upload error:', error)
       setError(error instanceof Error ? error.message : t('projects.uploadError'))
     } finally {
       setIsUploading(false)

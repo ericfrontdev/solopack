@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 interface FeedbackDetailsModalProps {
   feedbackId: string
@@ -154,7 +155,7 @@ export function FeedbackDetailsModal({
         setLinkedIssue(data.linkedIssue || '')
       }
     } catch (error) {
-      console.error('Error loading feedback:', error)
+      logger.error('Error loading feedback:', error)
     } finally {
       setLoading(false)
     }
@@ -183,7 +184,7 @@ export function FeedbackDetailsModal({
         router.refresh()
       }
     } catch (error) {
-      console.error('Error sending message:', error)
+      logger.error('Error sending message:', error)
       alert(t('feedback.sendError'))
     } finally {
       setSending(false)
@@ -210,7 +211,7 @@ export function FeedbackDetailsModal({
         alert(t('success.updated'))
       }
     } catch (error) {
-      console.error('Error updating feedback:', error)
+      logger.error('Error updating feedback:', error)
       alert(t('admin.updateError'))
     } finally {
       setUpdating(false)
@@ -237,7 +238,7 @@ export function FeedbackDetailsModal({
         alert(t('success.updated'))
       }
     } catch (error) {
-      console.error('Error marking as resolved:', error)
+      logger.error('Error marking as resolved:', error)
       alert(t('admin.updateError'))
     } finally {
       setResolving(false)

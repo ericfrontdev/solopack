@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 // GET /api/feedback/user-unread-count - Get count of feedbacks with unread admin messages (for regular users)
 export async function GET() {
@@ -45,7 +46,7 @@ export async function GET() {
 
     return NextResponse.json({ count })
   } catch (error) {
-    console.error('Error fetching user unread count:', error)
+    logger.error('Error fetching user unread count:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération du nombre de messages non lus' },
       { status: 500 }

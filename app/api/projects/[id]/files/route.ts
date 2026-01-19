@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 export async function POST(
   request: Request,
@@ -57,7 +58,7 @@ export async function POST(
 
     return NextResponse.json(projectFile, { status: 201 })
   } catch (error) {
-    console.error('Error uploading file:', error)
+    logger.error('Error uploading file:', error)
     return NextResponse.json({
       error: 'Erreur lors de l\'upload du fichier',
       details: error instanceof Error ? error.message : 'Unknown error'

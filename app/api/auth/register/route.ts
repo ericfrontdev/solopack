@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { ZodError } from 'zod'
 import { validateBody, validationError, registerSchema } from '@/lib/validations'
 import { rateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: Request) {
   // Rate limiting: 5 registrations per hour per IP
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
     if (error instanceof ZodError) {
       return validationError(error)
     }
-    console.error('Error creating user:', error)
+    logger.error('Error creating user:', error)
     return NextResponse.json(
       { error: 'auth.userCreationError' },
       { status: 500 }

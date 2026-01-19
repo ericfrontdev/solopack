@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 type PaymentButtonProps = {
   invoiceId: string
@@ -50,7 +51,7 @@ export function PaymentButton({
 
       window.location.href = `https://www.paypal.com/cgi-bin/webscr?${params.toString()}`
     } catch (err) {
-      console.error('PayPal payment error:', err)
+      logger.error('PayPal payment error:', err)
       setError(t('invoices.paypal.initError'))
       setIsProcessing(false)
     }
@@ -75,7 +76,7 @@ export function PaymentButton({
       const { url } = await res.json()
       window.location.href = url
     } catch (err) {
-      console.error('Stripe payment error:', err)
+      logger.error('Stripe payment error:', err)
       setError(t('invoices.stripe.initError'))
       setIsProcessing(false)
     }

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MessageSquare } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 export function FeedbackBadge({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const [unreadCount, setUnreadCount] = useState(0)
@@ -18,7 +19,7 @@ export function FeedbackBadge({ isSuperAdmin }: { isSuperAdmin: boolean }) {
         setUnreadCount(data.count)
       }
     } catch (error) {
-      console.error('Error fetching unread count:', error)
+      logger.error('Error fetching unread count:', error)
     }
   }
 

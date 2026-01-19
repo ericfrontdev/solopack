@@ -6,6 +6,7 @@ import { resend } from '@/lib/resend'
 import PaymentAgreementEmail from '@/emails/payment-agreement-email'
 import { ZodError } from 'zod'
 import { validateSearchParams, validationError, projectsQuerySchema } from '@/lib/validations'
+import { logger } from '@/lib/logger'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const PAYMENT_AGREEMENT_FROM_EMAIL = process.env.PAYMENT_AGREEMENT_FROM_EMAIL || process.env.EMAIL_FROM || 'agreements@solopack.app'
@@ -126,7 +127,7 @@ export async function POST(request: Request) {
   const body = await request.json()
   const { clientId, name, description, status, budget, startDate, endDate, invoiceIds, paymentPlan } = body
 
-  console.log('POST /api/projects - Body:', { clientId, name, budget, paymentPlan })
+  logger.debug('POST /api/projects - Body:', { clientId, name, budget, paymentPlan })
 
   if (!clientId || !name) {
     return NextResponse.json(
@@ -177,12 +178,12 @@ export async function POST(request: Request) {
 
   // Si un plan de paiement est spécifié, créer l'entente et les factures
   if (paymentPlan && paymentPlan.numberOfInstallments && budget) {
-    console.log('Creating payment plan with:', { paymentPlan, budget })
+    logger.debug('Creating payment plan with:', { paymentPlan, budget })
     const { numberOfInstallments, frequency } = paymentPlan
     const totalBudget = parseFloat(budget)
     const amountPerInstallment = totalBudget / numberOfInstallments
 
-    console.log('Calculated:', { totalBudget, amountPerInstallment, numberOfInstallments })
+    logger.debug('Calculated:', { totalBudget, amountPerInstallment, numberOfInstallments })
 
     // Générer un token sécurisé
     const token = crypto.randomBytes(32).toString('hex')
@@ -204,7 +205,7 @@ export async function POST(request: Request) {
     for (let i = 0; i < numberOfInstallments; i++) {
       const invoiceNumber = await generateUniqueInvoiceNumber()
 
-      console.log(`Creating invoice ${i + 1}/${numberOfInstallments}:`, invoiceNumber)
+      logger.debug(`Creating invoice ${i + 1}/${numberOfInstallments}:`, invoiceNumber)
 
       const invoice = await prisma.invoice.create({
         data: {
@@ -229,14 +230,14 @@ export async function POST(request: Request) {
       invoices.push(invoice)
     }
 
-    console.log(`Created ${invoices.length} invoices for payment plan`)
+    logger.debug(`Created ${invoices.length} invoices for payment plan`)
 
     // Envoyer l'email au client avec l'entente
     try {
       const confirmUrl = `${APP_URL}/agreements/${token}/confirm`
 
-      console.log('Sending payment agreement email to:', client.email)
-      console.log('Confirm URL:', confirmUrl)
+      logger.debug('Sending payment agreement email to:', client.email)
+      logger.debug('Confirm URL:', confirmUrl)
 
       await resend.emails.send({
         from: PAYMENT_AGREEMENT_FROM_EMAIL,
@@ -253,9 +254,9 @@ export async function POST(request: Request) {
         }),
       })
 
-      console.log('Payment agreement email sent successfully')
+      logger.debug('Payment agreement email sent successfully')
     } catch (error) {
-      console.error('Error sending payment agreement email:', error)
+      logger.error('Error sending payment agreement email:', error)
       // Continue même si l'email échoue
     }
   }

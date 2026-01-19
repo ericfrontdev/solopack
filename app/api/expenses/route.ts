@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(expense)
   } catch (error) {
-    console.error('Error creating expense:', error)
+    logger.error('Error creating expense:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la création de la dépense' },
       { status: 500 }

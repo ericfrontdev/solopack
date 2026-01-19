@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 type Project = {
   id: string
@@ -107,15 +108,15 @@ export function ProjectModal({
   const handleStep1Submit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log('Step 1 submit - hasPaymentPlan:', hasPaymentPlan, 'project:', project)
+    logger.debug('Step 1 submit - hasPaymentPlan:', hasPaymentPlan, 'project:', project)
 
     if (hasPaymentPlan && !project) {
       // Passer à l'étape 2 pour configurer les versements
-      console.log('Going to step 2 for payment plan configuration')
+      logger.debug('Going to step 2 for payment plan configuration')
       setStep(2)
     } else {
       // Créer directement le projet sans plan de paiement
-      console.log('Creating project without payment plan')
+      logger.debug('Creating project without payment plan')
       await onSave(
         {
           name: formData.name,
@@ -133,7 +134,7 @@ export function ProjectModal({
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log('Step 2 submit - Creating project WITH payment plan:', paymentPlan)
+    logger.debug('Step 2 submit - Creating project WITH payment plan:', paymentPlan)
 
     // Créer le projet avec le plan de paiement
     await onSave(
@@ -287,7 +288,7 @@ export function ProjectModal({
                     <button
                       type="button"
                       onClick={() => {
-                        console.log('Payment plan set to: NO')
+                        logger.debug('Payment plan set to: NO')
                         setHasPaymentPlan(false)
                       }}
                       className={`px-3 py-1 text-sm rounded-l-md border transition-colors ${
@@ -301,7 +302,7 @@ export function ProjectModal({
                     <button
                       type="button"
                       onClick={() => {
-                        console.log('Payment plan set to: YES')
+                        logger.debug('Payment plan set to: YES')
                         setHasPaymentPlan(true)
                       }}
                       className={`px-3 py-1 text-sm rounded-r-md border transition-colors ${

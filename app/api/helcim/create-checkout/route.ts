@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 export async function POST() {
   try {
@@ -43,7 +44,7 @@ export async function POST() {
       : process.env.HELCIM_PLAN_ID_PRO
 
     if (!planId) {
-      console.error('ID de plan Helcim manquant')
+      logger.error('ID de plan Helcim manquant')
       return NextResponse.json(
         { error: 'Configuration de paiement manquante' },
         { status: 500 }
@@ -53,7 +54,7 @@ export async function POST() {
     const helcimApiToken = process.env.HELCIM_API_TOKEN
 
     if (!helcimApiToken) {
-      console.error('HELCIM_API_TOKEN manquant')
+      logger.error('HELCIM_API_TOKEN manquant')
       return NextResponse.json(
         { error: 'Configuration de paiement manquante' },
         { status: 500 }
@@ -82,7 +83,7 @@ export async function POST() {
 
       if (createCustomerResponse.ok) {
         // Customer créé avec succès
-        console.log('[create-checkout] Customer Helcim créé:', customerData)
+        logger.debug('[create-checkout] Customer Helcim créé:', customerData)
 
         // Stocker le customerCode dans notre BD
         await prisma.user.update({
@@ -96,7 +97,7 @@ export async function POST() {
         helcimCustomerCode = customerData.customerCode || user.id
       } else {
         // Le customer existe peut-être déjà, continuer quand même
-        console.log('[create-checkout] Erreur création customer (peut-être existe déjà):', customerData)
+        logger.debug('[create-checkout] Erreur création customer (peut-être existe déjà):', customerData)
       }
 
       // Construire l'URL d'abonnement Helcim
@@ -119,14 +120,14 @@ export async function POST() {
         planId,
       })
     } catch (error) {
-      console.error('[create-checkout] Erreur lors de la création du customer:', error)
+      logger.error('[create-checkout] Erreur lors de la création du customer:', error)
       return NextResponse.json(
         { error: 'Erreur lors de la préparation du paiement' },
         { status: 500 }
       )
     }
   } catch (error) {
-    console.error('Erreur lors de la création de la session Helcim:', error)
+    logger.error('Erreur lors de la création de la session Helcim:', error)
     return NextResponse.json(
       { error: 'Erreur interne du serveur' },
       { status: 500 }

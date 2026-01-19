@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 import { ZodError } from 'zod'
 import { validateBody, validationError, createInvoiceSchema } from '@/lib/validations'
+import { logger } from '@/lib/logger'
 
 function makeInvoiceNumber() {
   const d = new Date()
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
 
       // Mode 1: Création à partir d'items directs (nouveau)
       if (items) {
-        console.log('[invoices:POST] Creating invoice with direct items:', items.length)
+        logger.debug('[invoices:POST] Creating invoice with direct items:', items.length)
         invoiceItems = items.map(it => ({
           description: it.description,
           amount: it.amount,
@@ -66,13 +67,13 @@ export async function POST(req: Request) {
         })
 
         if (unpaidItems.length === 0) {
-          console.log('[invoices:POST] No valid unpaid items found')
+          logger.debug('[invoices:POST] No valid unpaid items found')
           throw new Error('NO_ITEMS')
         }
 
         invoiceItems = unpaidItems
         unpaidIds = unpaidItems.map(i => i.id)
-        console.log('[invoices:POST] Creating invoice from unpaid amounts:', unpaidItems.length)
+        logger.debug('[invoices:POST] Creating invoice from unpaid amounts:', unpaidItems.length)
       } else {
         throw new Error('NO_ITEMS')
       }
@@ -97,7 +98,7 @@ export async function POST(req: Request) {
           ...(dueDate && { dueDate: new Date(dueDate) }),
         },
       })
-      console.log('[invoices:POST] Invoice created:', invoice.id, invoice.number)
+      logger.debug('[invoices:POST] Invoice created:', invoice.id, invoice.number)
 
       // Snapshot des lignes de facture
       if (invoiceItems.length > 0) {
@@ -120,7 +121,7 @@ export async function POST(req: Request) {
             data: { status: 'invoiced', invoiceId: invoice.id },
           })
         } catch (e) {
-          console.warn('[invoices:POST] unpaidAmount.invoiceId link skipped (likely missing column):', e)
+          logger.warn('[invoices:POST] unpaidAmount.invoiceId link skipped (likely missing column):', e)
           await tx.unpaidAmount.updateMany({
             where: { id: { in: unpaidIds } },
             data: { status: 'invoiced' },

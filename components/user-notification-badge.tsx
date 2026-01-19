@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 export function UserNotificationBadge({ onClick }: { onClick?: () => void }) {
   const { t } = useTranslation()
@@ -16,7 +17,7 @@ export function UserNotificationBadge({ onClick }: { onClick?: () => void }) {
         const data = await response.json()
         setUnreadCount(data.count || 0)
       } catch (error) {
-        console.error('Error fetching unread count:', error)
+        logger.error('Error fetching unread count:', error)
       }
     }
 

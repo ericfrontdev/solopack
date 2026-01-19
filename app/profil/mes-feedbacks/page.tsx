@@ -2,6 +2,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { UserFeedbacksPageClient } from '@/components/pages/user-feedbacks-page-client'
+import { logger } from '@/lib/logger'
 
 async function getUserFeedbacks(userId: string) {
   try {
@@ -64,7 +65,7 @@ async function getUserFeedbacks(userId: string) {
 
     return { feedbacks: feedbacksWithUnread, stats }
   } catch (error) {
-    console.error('Error fetching user feedbacks:', error)
+    logger.error('Error fetching user feedbacks:', error)
     return null
   }
 }

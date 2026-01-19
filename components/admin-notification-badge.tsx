@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { MessageSquare } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 export function AdminNotificationBadge() {
   const { t } = useTranslation()
@@ -20,7 +21,7 @@ export function AdminNotificationBadge() {
           setUnreadCount(data.count)
         }
       } catch (error) {
-        console.error('Error fetching unread count:', error)
+        logger.error('Error fetching unread count:', error)
       }
     }
 

@@ -15,6 +15,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 type ProjectFile = {
   id: string
@@ -46,7 +47,7 @@ export function ProjectFilesList({ files }: { files: ProjectFile[] }) {
         alert(t('errors.deleteFailed'))
       }
     } catch (error) {
-      console.error('Error deleting file:', error)
+      logger.error('Error deleting file:', error)
       alert(t('errors.deleteFailed'))
     } finally {
       setIsDeleting(false)

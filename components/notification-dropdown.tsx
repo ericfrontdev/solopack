@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useTranslation } from '@/lib/i18n-context'
 import { Button } from '@/components/ui/button'
 import { useNotifications, useUnreadCount } from '@/hooks/use-notifications'
+import { logger } from '@/lib/logger'
 
 export function NotificationDropdown() {
   const { t, locale } = useTranslation()
@@ -31,7 +32,7 @@ export function NotificationDropdown() {
         )
       }
     } catch (error) {
-      console.error('Error marking notifications as read:', error)
+      logger.error('Error marking notifications as read:', error)
     }
   }
 

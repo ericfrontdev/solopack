@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Loader2, Save } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n-context'
 import { toast } from 'sonner'
+import { logger } from '@/lib/logger'
 
 type Settings = {
   id: string
@@ -53,7 +54,7 @@ export function SettingsForm({ settings }: { settings: Settings }) {
         toast.error(t('admin.saveError'))
       }
     } catch (error) {
-      console.error('Error saving settings:', error)
+      logger.error('Error saving settings:', error)
       toast.error(t('admin.saveError'))
     } finally {
       setSaving(false)

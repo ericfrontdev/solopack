@@ -3,6 +3,7 @@ import { render } from '@react-email/components'
 import FeedbackNotification from '@/emails/feedback-notification'
 import FeedbackMessageNotification from '@/emails/feedback-message-notification'
 import { prisma } from './prisma'
+import { logger } from '@/lib/logger'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev'
@@ -23,7 +24,7 @@ export async function sendFeedbackCreatedNotification(feedbackId: string) {
     })
 
     if (!feedback) {
-      console.error('Feedback not found:', feedbackId)
+      logger.error('Feedback not found:', feedbackId)
       return { success: false, error: 'Feedback not found' }
     }
 
@@ -31,7 +32,7 @@ export async function sendFeedbackCreatedNotification(feedbackId: string) {
     const superAdmins = await prisma.superAdmin.findMany()
 
     if (superAdmins.length === 0) {
-      console.warn('No super admins found to notify')
+      logger.warn('No super admins found to notify')
       return { success: false, error: 'No admins to notify' }
     }
 
@@ -80,7 +81,7 @@ export async function sendFeedbackCreatedNotification(feedbackId: string) {
     const failures = results.filter((r) => r.status === 'rejected')
 
     if (failures.length > 0) {
-      console.error('Some emails failed to send:', failures)
+      logger.error('Some emails failed to send:', failures)
     }
 
     return {
@@ -89,7 +90,7 @@ export async function sendFeedbackCreatedNotification(feedbackId: string) {
       failed: failures.length,
     }
   } catch (error) {
-    console.error('Error sending feedback notification:', error)
+    logger.error('Error sending feedback notification:', error)
     return { success: false, error }
   }
 }
@@ -125,7 +126,7 @@ export async function sendFeedbackMessageNotification(
     })
 
     if (!message) {
-      console.error('Message not found:', messageId)
+      logger.error('Message not found:', messageId)
       return { success: false, error: 'Message not found' }
     }
 
@@ -215,7 +216,7 @@ export async function sendFeedbackMessageNotification(
       }
     }
   } catch (error) {
-    console.error('Error sending message notification:', error)
+    logger.error('Error sending message notification:', error)
     return { success: false, error }
   }
 }

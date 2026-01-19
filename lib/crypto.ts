@@ -15,7 +15,7 @@ function getEncryptionKey(): Buffer {
   if (!keyHex) {
     throw new Error(
       'ENCRYPTION_KEY environment variable is not set. ' +
-      'Generate one with: node -e "console.log(crypto.randomBytes(32).toString(\'hex\'))"'
+      'Generate one with: node -e "logger.debug(crypto.randomBytes(32).toString(\'hex\'))"'
     )
   }
 

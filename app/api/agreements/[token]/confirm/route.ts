@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Resend } from 'resend'
+import { logger } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const EMAIL_FROM = process.env.EMAIL_FROM || 'notifications@solopack.app'
@@ -166,10 +167,10 @@ export async function POST(
             </html>
           `,
         })
-        console.log('[confirm] Notification email sent to:', userEmail)
+        logger.debug('[confirm] Notification email sent to:', userEmail)
       }
     } catch (emailError) {
-      console.error('[confirm] Failed to send notification email:', emailError)
+      logger.error('[confirm] Failed to send notification email:', emailError)
       // Continue même si l'email échoue
     }
 
@@ -179,7 +180,7 @@ export async function POST(
       agreement,
     })
   } catch (error) {
-    console.error('Error confirming agreement:', error)
+    logger.error('Error confirming agreement:', error)
     return NextResponse.json(
       { error: 'Une erreur est survenue' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Check, Loader2, AlertCircle } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 interface PricingCardProps {
   isBetaTester: boolean
@@ -59,7 +60,7 @@ export function PricingCard({
         setLoading(false)
       }
     } catch (err) {
-      console.error('Error:', err)
+      logger.error('Error:', err)
       setError(t('pricing.genericError'))
       setLoading(false)
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { logger } from '@/lib/logger'
 
 // GET /api/invoices/[id]/reminders - Récupérer les rappels d'une facture
 export async function GET(
@@ -77,7 +78,7 @@ export async function GET(
       scheduled: scheduledReminders,
     })
   } catch (error) {
-    console.error('[invoices/reminders:GET] Error:', error)
+    logger.error('[invoices/reminders:GET] Error:', error)
     return NextResponse.json({ error: 'Erreur lors de la récupération des rappels.' }, { status: 500 })
   }
 }

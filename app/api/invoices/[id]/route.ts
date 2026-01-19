@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { logger } from '@/lib/logger'
 
 export async function GET(
   _req: Request,
@@ -211,7 +212,7 @@ export async function PATCH(
 
     return NextResponse.json(updated)
   } catch (error) {
-    console.error('Update error:', error)
+    logger.error('Update error:', error)
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

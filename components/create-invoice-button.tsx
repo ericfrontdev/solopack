@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { CreateInvoiceForProjectModal } from '@/components/crm/create-invoice-for-project-modal'
 import { useTranslation } from '@/lib/i18n-context'
+import { logger } from '@/lib/logger'
 
 type Client = {
   id: string
@@ -46,25 +47,25 @@ export function CreateInvoiceButton() {
   useEffect(() => {
     Promise.all([
       fetch('/api/clients').then(res => {
-        console.log('[CreateInvoiceButton] Clients response status:', res.status, res.ok)
+        logger.debug('[CreateInvoiceButton] Clients response status:', res.status, res.ok)
         if (!res.ok) {
-          console.error('[CreateInvoiceButton] Clients API error:', res.status, res.statusText)
+          logger.error('[CreateInvoiceButton] Clients API error:', res.status, res.statusText)
           return []
         }
         return res.json()
       }),
       fetch('/api/projects').then(res => {
-        console.log('[CreateInvoiceButton] Projects response status:', res.status, res.ok)
+        logger.debug('[CreateInvoiceButton] Projects response status:', res.status, res.ok)
         if (!res.ok) {
-          console.error('[CreateInvoiceButton] Projects API error:', res.status, res.statusText)
+          logger.error('[CreateInvoiceButton] Projects API error:', res.status, res.statusText)
           return []
         }
         return res.json()
       }),
     ])
       .then(([clientsData, projectsData]) => {
-        console.log('[CreateInvoiceButton] Clients data:', clientsData)
-        console.log('[CreateInvoiceButton] Projects data:', projectsData)
+        logger.debug('[CreateInvoiceButton] Clients data:', clientsData)
+        logger.debug('[CreateInvoiceButton] Projects data:', projectsData)
 
         const filteredClients = Array.isArray(clientsData)
           ? clientsData.filter((c: Client & { archived?: boolean }) => !c.archived)
@@ -73,15 +74,15 @@ export function CreateInvoiceButton() {
           ? projectsData.filter((p: Project & { status?: string }) => p.status === 'active')
           : []
 
-        console.log('[CreateInvoiceButton] Filtered clients:', filteredClients)
-        console.log('[CreateInvoiceButton] Filtered projects:', filteredProjects)
+        logger.debug('[CreateInvoiceButton] Filtered clients:', filteredClients)
+        logger.debug('[CreateInvoiceButton] Filtered projects:', filteredProjects)
 
         setClients(filteredClients)
         setProjects(filteredProjects)
         setLoading(false)
       })
       .catch((error) => {
-        console.error('[CreateInvoiceButton] Error loading data:', error)
+        logger.error('[CreateInvoiceButton] Error loading data:', error)
         setLoading(false)
       })
   }, [])
@@ -114,7 +115,7 @@ export function CreateInvoiceButton() {
         router.push(`/invoices?view=${invoice.id}`)
       }
     } catch (error) {
-      console.error('Error creating invoice:', error)
+      logger.error('Error creating invoice:', error)
     } finally {
       setCreating(false)
     }

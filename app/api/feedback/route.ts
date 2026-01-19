@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { sendFeedbackCreatedNotification } from '@/lib/feedback-emails'
+import { logger } from '@/lib/logger'
 
 // GET /api/feedback - Liste des feedbacks (admin voit tout, user voit les siens)
 export async function GET(req: NextRequest) {
@@ -63,7 +64,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(feedbacks)
   } catch (error) {
-    console.error('Error fetching feedbacks:', error)
+    logger.error('Error fetching feedbacks:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des feedbacks' },
       { status: 500 }
@@ -139,12 +140,12 @@ export async function POST(req: NextRequest) {
 
     // Send email notification to admins (don't await to avoid blocking response)
     sendFeedbackCreatedNotification(feedback.id).catch((error) => {
-      console.error('Failed to send feedback notification email:', error)
+      logger.error('Failed to send feedback notification email:', error)
     })
 
     return NextResponse.json(feedback, { status: 201 })
   } catch (error) {
-    console.error('Error creating feedback:', error)
+    logger.error('Error creating feedback:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la création du feedback' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { logger } from '@/lib/logger'
 
 // GET /api/admin/settings - Récupérer les settings système
 export async function GET() {
@@ -33,7 +34,7 @@ export async function GET() {
 
     return NextResponse.json(settings)
   } catch (error) {
-    console.error('Error fetching settings:', error)
+    logger.error('Error fetching settings:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la récupération des paramètres' },
       { status: 500 }
@@ -90,7 +91,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(settings)
   } catch (error) {
-    console.error('Error updating settings:', error)
+    logger.error('Error updating settings:', error)
     return NextResponse.json(
       { error: 'Erreur lors de la mise à jour des paramètres' },
       { status: 500 }

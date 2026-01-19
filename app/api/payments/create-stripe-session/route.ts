@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
 import { decrypt } from '@/lib/crypto'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
     try {
       stripeSecretKey = decrypt(invoice.client.user.stripeSecretKey)
     } catch (error) {
-      console.error('[create-stripe-session] Error decrypting Stripe key:', error)
+      logger.error('[create-stripe-session] Error decrypting Stripe key:', error)
       return NextResponse.json(
         { error: 'Erreur lors du déchiffrement de la clé Stripe. Veuillez reconfigurer votre clé dans les paramètres.' },
         { status: 500 }
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
       apiVersion: '2025-10-29.clover',
     })
 
-    console.log('[create-stripe-session] Creating session:', {
+    logger.debug('[create-stripe-session] Creating session:', {
       invoiceNumber: invoice.number,
       totalAmount: Math.round(invoice.total * 100),
     })
@@ -103,11 +104,11 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.checkout.sessions.create(sessionConfig)
 
-    console.log('[create-stripe-session] Session created:', session.id)
+    logger.debug('[create-stripe-session] Session created:', session.id)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    console.error('[create-stripe-session] Error:', error)
+    logger.error('[create-stripe-session] Error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue'
     return NextResponse.json(
       { error: 'Erreur lors de la création de la session de paiement', details: errorMessage },

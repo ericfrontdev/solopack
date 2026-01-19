@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Resend } from 'resend'
 import { getReminderEmailHtml, getReminderSubject } from '@/lib/reminder-email-templates'
+import { logger } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -162,7 +163,7 @@ export async function POST(req: Request) {
           status: 'sent',
         })
       } catch (error) {
-        console.error(`[reminders:check] Error sending reminder for invoice ${invoice.id}:`, error)
+        logger.error(`[reminders:check] Error sending reminder for invoice ${invoice.id}:`, error)
 
         // Enregistrer l'erreur
         await prisma.invoiceReminder.create({
@@ -191,7 +192,7 @@ export async function POST(req: Request) {
       results,
     })
   } catch (error) {
-    console.error('[reminders:check] Error:', error)
+    logger.error('[reminders:check] Error:', error)
     return NextResponse.json({ error: 'Erreur lors de la vérification des rappels.' }, { status: 500 })
   }
 }

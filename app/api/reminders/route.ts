@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { logger } from '@/lib/logger'
 
 // GET /api/reminders - Récupérer l'historique global des rappels
 export async function GET() {
@@ -40,7 +41,7 @@ export async function GET() {
 
     return NextResponse.json(reminders)
   } catch (error) {
-    console.error('[reminders:GET] Error:', error)
+    logger.error('[reminders:GET] Error:', error)
     return NextResponse.json({ error: 'Erreur lors de la récupération des rappels.' }, { status: 500 })
   }
 }
