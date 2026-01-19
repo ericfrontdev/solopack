@@ -32,6 +32,16 @@ export async function POST(req: Request) {
             company: true,
             email: true,
             userId: true,
+            user: {
+              select: {
+                autoRemindersEnabled: true,
+                reminderMiseEnDemeureTemplate: true,
+                email: true,
+                company: true,
+                name: true,
+                logo: true,
+              },
+            },
           },
         },
         reminders: {
@@ -52,18 +62,8 @@ export async function POST(req: Request) {
     for (const invoice of invoices) {
       if (!invoice.dueDate) continue
 
-      // Récupérer les paramètres de l'utilisateur
-      const user = await prisma.user.findUnique({
-        where: { id: invoice.client.userId },
-        select: {
-          autoRemindersEnabled: true,
-          reminderMiseEnDemeureTemplate: true,
-          email: true,
-          company: true,
-          name: true,
-          logo: true,
-        },
-      })
+      // Utiliser les paramètres de l'utilisateur déjà chargés (évite N+1 queries)
+      const user = invoice.client.user
 
       // Ignorer si les rappels auto ne sont pas activés
       if (!user?.autoRemindersEnabled) continue
