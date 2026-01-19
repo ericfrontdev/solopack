@@ -40,16 +40,66 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Validation 1: Type MIME (images seulement)
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ]
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Type de fichier non autorisé. Seules les images (JPEG, PNG, GIF, WebP) sont acceptées.' },
+        { status: 400 }
+      )
+    }
+
+    // Validation 2: Taille du fichier (5MB max)
+    const maxSize = 5 * 1024 * 1024 // 5MB en bytes
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'Fichier trop volumineux. Taille maximale: 5MB.' },
+        { status: 400 }
+      )
+    }
+
+    // Validation 3: Nom du fichier (caractères sécurisés seulement)
+    const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    if (sanitizedName !== file.name) {
+      logger.debug('Filename sanitized:', { original: file.name, sanitized: sanitizedName })
+    }
+
     // Convertir le fichier en buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+
+    // Validation 4: Vérifier le magic number (signature du fichier)
+    const signature = buffer.toString('hex', 0, 4)
+    const validSignatures = [
+      'ffd8ffe0', // JPEG
+      'ffd8ffe1', // JPEG
+      'ffd8ffe2', // JPEG
+      '89504e47', // PNG
+      '47494638', // GIF
+      '52494646', // WebP (RIFF)
+    ]
+
+    if (!validSignatures.some(sig => signature.startsWith(sig.substring(0, 8)))) {
+      logger.error('Invalid file signature:', signature)
+      return NextResponse.json(
+        { error: 'Fichier corrompu ou type non valide.' },
+        { status: 400 }
+      )
+    }
 
     // Upload vers Cloudinary
     const result = await new Promise<{secure_url: string; public_id: string}>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
           folder: 'solopack-feedback',
-          resource_type: 'auto',
+          resource_type: 'image', // Images seulement (plus de 'auto')
           // Optimisations automatiques
           transformation: [
             { width: 1920, crop: 'limit' }, // Max 1920px de large
