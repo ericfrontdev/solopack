@@ -17,19 +17,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 })
     }
 
-    // Vérifier le type de fichier
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'Le fichier doit être une image' }, { status: 400 })
+    // Validation 1: Type MIME strict (logos seulement)
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/svg+xml',
+    ]
+
+    if (!allowedMimeTypes.includes(file.type)) {
+      return NextResponse.json(
+        { error: 'Type de fichier non autorisé. Seuls JPEG, PNG, WebP et SVG sont acceptés.' },
+        { status: 400 }
+      )
     }
 
-    // Vérifier la taille (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'Le fichier est trop volumineux (max 5MB)' }, { status: 400 })
+    // Validation 2: Taille (max 2MB pour un logo)
+    const maxSize = 2 * 1024 * 1024 // 2MB
+    if (file.size > maxSize) {
+      return NextResponse.json(
+        { error: 'Fichier trop volumineux. Taille maximale: 2MB.' },
+        { status: 400 }
+      )
     }
 
     // Convertir le fichier en base64
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+
+    // Validation 3: Vérifier le magic number (sauf pour SVG qui est XML)
+    if (file.type !== 'image/svg+xml') {
+      const signature = buffer.toString('hex', 0, 4)
+      const validSignatures = [
+        'ffd8ffe0', // JPEG
+        'ffd8ffe1', // JPEG
+        'ffd8ffe2', // JPEG
+        '89504e47', // PNG
+        '52494646', // WebP (RIFF)
+      ]
+
+      if (!validSignatures.some(sig => signature.startsWith(sig.substring(0, 8)))) {
+        logger.error('Invalid logo file signature:', signature)
+        return NextResponse.json(
+          { error: 'Fichier corrompu ou type non valide.' },
+          { status: 400 }
+        )
+      }
+    }
+
     const base64 = buffer.toString('base64')
     const logoUrl = `data:${file.type};base64,${base64}`
 
