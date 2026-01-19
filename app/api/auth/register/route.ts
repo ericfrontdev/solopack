@@ -3,8 +3,21 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { ZodError } from 'zod'
 import { validateBody, validationError, registerSchema } from '@/lib/validations'
+import { rateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rate-limit'
 
 export async function POST(req: Request) {
+  // Rate limiting: 5 registrations per hour per IP
+  const clientIp = getClientIp(req)
+  const rateLimitResult = rateLimit(clientIp, {
+    limit: 5,
+    windowMs: 60 * 60 * 1000, // 1 hour
+    message: 'Trop de tentatives d\'inscription. Veuillez réessayer plus tard.',
+  })
+
+  if (rateLimitResult) {
+    return rateLimitResult
+  }
+
   try {
     // Validate request body with Zod
     const { name, email, password, company } = await validateBody(req, registerSchema)
@@ -49,9 +62,14 @@ export async function POST(req: Request) {
       },
     })
 
+    const rateLimitHeaders = getRateLimitHeaders(clientIp, {
+      limit: 5,
+      windowMs: 60 * 60 * 1000,
+    })
+
     return NextResponse.json(
       { message: 'Utilisateur créé avec succès', userId: user.id },
-      { status: 201 }
+      { status: 201, headers: rateLimitHeaders }
     )
   } catch (error) {
     if (error instanceof ZodError) {

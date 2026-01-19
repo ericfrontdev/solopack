@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { v2 as cloudinary } from 'cloudinary'
+import { rateLimit, getRateLimitHeaders } from '@/lib/rate-limit'
 
 // Configuration Cloudinary
 cloudinary.config({
@@ -15,6 +16,17 @@ export async function POST(req: NextRequest) {
     const session = await auth()
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    // Rate limiting: 20 uploads per 15 minutes per user
+    const rateLimitResult = rateLimit(`upload:${session.user.id}`, {
+      limit: 20,
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      message: 'Trop d\'uploads. Veuillez réessayer dans quelques minutes.',
+    })
+
+    if (rateLimitResult) {
+      return rateLimitResult
     }
 
     const formData = await req.formData()
@@ -51,10 +63,18 @@ export async function POST(req: NextRequest) {
       ).end(buffer)
     })
 
-    return NextResponse.json({
-      url: result.secure_url,
-      publicId: result.public_id,
+    const rateLimitHeaders = getRateLimitHeaders(`upload:${session.user.id}`, {
+      limit: 20,
+      windowMs: 15 * 60 * 1000,
     })
+
+    return NextResponse.json(
+      {
+        url: result.secure_url,
+        publicId: result.public_id,
+      },
+      { headers: rateLimitHeaders }
+    )
   } catch (error) {
     console.error('Error uploading to Cloudinary:', error)
     return NextResponse.json(
