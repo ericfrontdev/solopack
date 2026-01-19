@@ -4,11 +4,24 @@ import { resend } from '@/lib/resend'
 import { render } from '@react-email/components'
 import PasswordResetEmail from '@/emails/password-reset-email'
 import crypto from 'crypto'
+import { rateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rate-limit'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 const FROM_EMAIL = process.env.EMAIL_FROM || 'onboarding@resend.dev'
 
 export async function POST(req: Request) {
+  // Rate limiting: 3 attempts per 15 minutes per IP
+  const clientIp = getClientIp(req)
+  const rateLimitResult = rateLimit(clientIp, {
+    limit: 3,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    message: 'Trop de tentatives de réinitialisation. Veuillez réessayer dans quelques minutes.',
+  })
+
+  if (rateLimitResult) {
+    return rateLimitResult
+  }
+
   try {
     const { email } = await req.json()
 
@@ -26,18 +39,29 @@ export async function POST(req: Request) {
 
     // Pour la sécurité, toujours retourner le même message
     // même si l'utilisateur n'existe pas (évite l'énumération d'emails)
+    const rateLimitHeaders = getRateLimitHeaders(clientIp, {
+      limit: 3,
+      windowMs: 15 * 60 * 1000,
+    })
+
     if (!user) {
-      return NextResponse.json({
-        message: 'Si cet email existe dans notre système, un lien de réinitialisation a été envoyé.',
-      })
+      return NextResponse.json(
+        {
+          message: 'Si cet email existe dans notre système, un lien de réinitialisation a été envoyé.',
+        },
+        { headers: rateLimitHeaders }
+      )
     }
 
     // Vérifier que l'utilisateur a un mot de passe (pas juste Google OAuth)
     if (!user.password) {
       // L'utilisateur utilise probablement Google OAuth
-      return NextResponse.json({
-        message: 'Si cet email existe dans notre système, un lien de réinitialisation a été envoyé.',
-      })
+      return NextResponse.json(
+        {
+          message: 'Si cet email existe dans notre système, un lien de réinitialisation a été envoyé.',
+        },
+        { headers: rateLimitHeaders }
+      )
     }
 
     // Générer un token sécurisé
@@ -76,9 +100,12 @@ export async function POST(req: Request) {
       html,
     })
 
-    return NextResponse.json({
-      message: 'Si cet email existe dans notre système, un lien de réinitialisation a été envoyé.',
-    })
+    return NextResponse.json(
+      {
+        message: 'Si cet email existe dans notre système, un lien de réinitialisation a été envoyé.',
+      },
+      { headers: rateLimitHeaders }
+    )
   } catch (error) {
     console.error('Error in forgot-password:', error)
     return NextResponse.json(
